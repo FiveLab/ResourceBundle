@@ -1,0 +1,174 @@
+<?php
+
+/*
+ * This file is part of the FiveLab ResourceBundle package
+ *
+ * (c) FiveLab
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code
+ */
+
+namespace FiveLab\Bundle\ResourceBundle\Tests\ParamConverter;
+
+use FiveLab\Bundle\ResourceBundle\ParamConverter\ResourceParamConverter;
+use FiveLab\Component\Resource\Resource\ResourceInterface;
+use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContextCollectorInterface;
+use FiveLab\Component\Resource\Serializer\Context\ResourceSerializationContext;
+use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerResolverInterface;
+use FiveLab\Component\Resource\Serializer\ResourceSerializerInterface;
+use PHPUnit\Framework\TestCase;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\HttpFoundation\Request;
+
+/**
+ * @author Vitaliy Zhuk <v.zhuk@fivelab.org>
+ */
+class ResourceParamConverterTest extends TestCase
+{
+    /**
+     * @var ResourceSerializerResolverInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $serializerResolver;
+
+    /**
+     * @var SerializationContextCollectorInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $serializationContextCollector;
+
+    /**
+     * @var ResourceParamConverter
+     */
+    private $converter;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        $this->serializerResolver = $this->createMock(ResourceSerializerResolverInterface::class);
+        $this->serializationContextCollector = $this->createMock(SerializationContextCollectorInterface::class);
+        $this->converter = new ResourceParamConverter($this->serializerResolver, $this->serializationContextCollector);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldSupportForResource(): void
+    {
+        $config = new ParamConverter([
+            'class' => ResourceInterface::class,
+        ]);
+
+        $supports = $this->converter->supports($config);
+
+        self::assertTrue($supports);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldNotSupportsIfPassNoResource(): void
+    {
+        $config = new ParamConverter([
+            'class' => \stdClass::class,
+        ]);
+
+        $supports = $this->converter->supports($config);
+
+        self::assertFalse($supports);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldSuccessConvertForOptionalValueWithoutContent(): void
+    {
+        $request = $this->createRequest('');
+        $config = new ParamConverter([
+            'class' => ResourceInterface::class,
+            'name'  => 'some',
+        ]);
+
+        $config->setIsOptional(true);
+
+        $this->converter->apply($request, $config);
+
+        self::assertTrue($request->attributes->has('some'));
+        self::assertNull($request->attributes->get('some'));
+    }
+
+    /**
+     * @test
+     *
+     * @expectedException \FiveLab\Bundle\ResourceBundle\Exception\MissingContentInRequestException
+     * @expectedExceptionMessage Missing content in request.
+     */
+    public function shouldThrowExceptionOnConvertForRequiredValueWithoutContent(): void
+    {
+        $request = $this->createRequest('');
+        $config = new ParamConverter([
+            'class' => ResourceInterface::class,
+            'name'  => 'some',
+        ]);
+
+        $this->converter->apply($request, $config);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldSuccessConvert(): void
+    {
+        $request = $this->createRequest('some-foo-content', 'application/some');
+        $context = new ResourceSerializationContext([]);
+        $serializer = $this->createMock(ResourceSerializerInterface::class);
+        $resource = $this->createMock(ResourceInterface::class);
+        $config = new ParamConverter([
+            'class' => ResourceInterface::class,
+            'name'  => 'some',
+        ]);
+
+        $this->serializationContextCollector->expects(self::once())
+            ->method('collect')
+            ->willReturn($context);
+
+        $this->serializerResolver->expects(self::once())
+            ->method('resolveByMediaType')
+            ->with(ResourceInterface::class, 'application/some')
+            ->willReturn($serializer);
+
+        $serializer->expects(self::once())
+            ->method('deserialize')
+            ->with('some-foo-content', ResourceInterface::class, $context)
+            ->willReturn($resource);
+
+        $this->converter->apply($request, $config);
+
+        self::assertTrue($request->attributes->has('some'));
+        self::assertEquals($resource, $request->attributes->get('some'));
+    }
+
+    /**
+     * Create the request with content
+     *
+     * @param string $content
+     * @param string $mediaType
+     *
+     * @return Request
+     */
+    private function createRequest(string $content, string $mediaType = ''): Request
+    {
+        return new Request(
+            [],
+            [],
+            [],
+            [],
+            [],
+            [
+                'HTTP_Content-Type' => $mediaType,
+            ],
+            $content
+        );
+    }
+}

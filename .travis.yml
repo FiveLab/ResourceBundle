@@ -1,0 +1,14 @@
+language: php
+
+php:
+    - 7.1
+
+before_script:
+    # Install composer
+    - wget http://getcomposer.org/composer.phar
+    - php composer.phar install
+
+script:
+    - ./bin/phpmetrics src
+    - ./bin/phpcs --standard=vendor/escapestudios/symfony2-coding-standard/Symfony2/ src/ tests/
+    - ./bin/phpunit

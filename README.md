@@ -1,6 +1,8 @@
 ResourceBundle
 ===============
 
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/b8135dc7-3a24-4641-bdba-44de86dedd8e/mini.png)](https://insight.sensiolabs.com/projects/b8135dc7-3a24-4641-bdba-44de86dedd8e)
+[![Build Status](https://api.travis-ci.org/FiveLab/ResourceBundle.svg?branch=master)](https://travis-ci.org/FiveLab/ResourceBundle)
 
 Integrate the Resource library with Symfony applications.
 
@@ -54,4 +56,3 @@ Contributors:
 -------------
 
 Thanks to [everyone participating](https://github.com/FiveLab/ResourceBundle/graphs/contributors) in the development of this Resource library!
-

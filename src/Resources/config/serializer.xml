@@ -26,16 +26,16 @@
             <tag name="resource.serializer.normalizer"/>
         </service>
 
+        <service id="fivelab.resource.serializer.normalizer.datetime" class="%fivelab.resource.serializer.normalizer.datetime.class%" public="false">
+            <tag name="resource.serializer.normalizer"/>
+        </service>
+
         <service id="fivelab.resource.serializer.normalizer.object" class="%fivelab.resource.serializer.normalizer.object.class%" public="false">
             <argument type="service" id="fivelab.resource.serializer.metadata_factory" on-invalid="null"/>
             <argument type="service" id="fivelab.resource.serializer.name_converter" on-invalid="null"/>
             <argument type="service" id="fivelab.resource.serializer.property_accessor" on-invalid="null"/>
             <argument type="service" id="fivelab.resource.serializer.property_info" on-invalid="null"/>
             <argument>%fivelab.resource.serializer.serialize_null%</argument>
-            <tag name="resource.serializer.normalizer"/>
-        </service>
-
-        <service id="fivelab.resource.serializer.normalizer.datetime" class="%fivelab.resource.serializer.normalizer.datetime.class%" public="false">
             <tag name="resource.serializer.normalizer"/>
         </service>
 

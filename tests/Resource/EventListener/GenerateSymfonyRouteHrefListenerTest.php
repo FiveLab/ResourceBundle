@@ -12,7 +12,11 @@
 namespace FiveLab\Bundle\ResourceBundle\Tests\Resource\EventListener;
 
 use FiveLab\Bundle\ResourceBundle\Resource\EventListener\GenerateSymfonyRouteHrefListener;
-use FiveLab\Bundle\ResourceBundle\Resource\Relation\Href\SymfonyRouteHref;
+use FiveLab\Bundle\ResourceBundle\Resource\Href\SymfonyRouteHref;
+use FiveLab\Component\Resource\Resource\Action\Action;
+use FiveLab\Component\Resource\Resource\Action\ActionCollection;
+use FiveLab\Component\Resource\Resource\Action\Method;
+use FiveLab\Component\Resource\Resource\ActionedResourceInterface;
 use FiveLab\Component\Resource\Resource\Href\Href;
 use FiveLab\Component\Resource\Resource\RelatedResourceInterface;
 use FiveLab\Component\Resource\Resource\Relation\Relation;
@@ -49,7 +53,7 @@ class GenerateSymfonyRouteHrefListenerTest extends TestCase
     /**
      * @test
      */
-    public function shouldNotProcessIfPassNotRelatedResource(): void
+    public function shouldNotProcessIfPassNotRelatedAndActionedResource(): void
     {
         $resource = $this->createMock(ResourceInterface::class);
 
@@ -62,7 +66,7 @@ class GenerateSymfonyRouteHrefListenerTest extends TestCase
     /**
      * @test
      */
-    public function shouldSuccessProcess(): void
+    public function shouldSuccessProcessWithRelations(): void
     {
         $resource = $this->createMock(RelatedResourceInterface::class);
 
@@ -83,5 +87,31 @@ class GenerateSymfonyRouteHrefListenerTest extends TestCase
         $this->listener->onBeforeNormalization(new BeforeNormalizationEvent($resource, 'json', []));
 
         self::assertEquals(new Href('/symfony-path'), $relations[1]->getHref());
+    }
+
+    /**
+     * @test
+     */
+    public function shouldSuccessProcessWithActions(): void
+    {
+        $resource = $this->createMock(ActionedResourceInterface::class);
+
+        $actions = [
+            new Action('some', new Href('/path'), Method::post()),
+            new Action('about', new SymfonyRouteHref('route_name', ['route_params'], false, UrlGeneratorInterface::NETWORK_PATH), Method::post()),
+        ];
+
+        $resource->expects(self::once())
+            ->method('getActions')
+            ->willReturn(new ActionCollection(...$actions));
+
+        $this->urlGenerator->expects(self::once())
+            ->method('generate')
+            ->with('route_name', ['route_params'], UrlGeneratorInterface::NETWORK_PATH)
+            ->willReturn('/symfony-path');
+
+        $this->listener->onBeforeNormalization(new BeforeNormalizationEvent($resource, 'json', []));
+
+        self::assertEquals(new Href('/symfony-path'), $actions[1]->getHref());
     }
 }

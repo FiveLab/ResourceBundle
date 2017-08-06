@@ -13,8 +13,10 @@ declare(strict_types = 1);
 
 namespace FiveLab\Bundle\ResourceBundle\Resource\EventListener;
 
-use FiveLab\Bundle\ResourceBundle\Resource\Relation\Href\SymfonyRouteHref;
+use FiveLab\Bundle\ResourceBundle\Resource\Href\SymfonyRouteHref;
+use FiveLab\Component\Resource\Resource\ActionedResourceInterface;
 use FiveLab\Component\Resource\Resource\Href\Href;
+use FiveLab\Component\Resource\Resource\Href\HrefInterface;
 use FiveLab\Component\Resource\Resource\RelatedResourceInterface;
 use FiveLab\Component\Resource\Serializer\Events\BeforeNormalizationEvent;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -50,31 +52,69 @@ class GenerateSymfonyRouteHrefListener
     {
         $resource = $event->getResource();
 
-        if (!$resource instanceof RelatedResourceInterface) {
-            return;
+        if ($resource instanceof RelatedResourceInterface) {
+            $this->fixForRelations($resource);
         }
 
+        if ($resource instanceof ActionedResourceInterface) {
+            $this->fixForActions($resource);
+        }
+    }
+
+    /**
+     * Fix links for actions
+     *
+     * @param ActionedResourceInterface $resource
+     */
+    private function fixForActions(ActionedResourceInterface $resource): void
+    {
+        $actions = $resource->getActions();
+
+        foreach ($actions as $action) {
+            $routeHref = $action->getHref();
+            $href = $this->fixHref($routeHref);
+            $action->setHref($href);
+        }
+    }
+
+    /**
+     * Fix links for relations
+     *
+     * @param RelatedResourceInterface $resource
+     */
+    private function fixForRelations(RelatedResourceInterface $resource): void
+    {
         $relations = $resource->getRelations();
 
         foreach ($relations as $relation) {
             $routeHref = $relation->getHref();
-
-            if (!$routeHref instanceof SymfonyRouteHref) {
-                continue;
-            }
-
-            $path = $this->urlGenerator->generate(
-                $routeHref->getRouteName(),
-                $routeHref->getRouteParameters(),
-                $routeHref->getReferenceType()
-            );
-
-            $href = new Href(
-                $path,
-                $routeHref->isTemplated()
-            );
-
+            $href = $this->fixHref($routeHref);
             $relation->setHref($href);
         }
+    }
+
+    /**
+     * Try to fix href
+     *
+     * @param HrefInterface $routeHref
+     *
+     * @return HrefInterface
+     */
+    private function fixHref(HrefInterface $routeHref): HrefInterface
+    {
+        if (!$routeHref instanceof SymfonyRouteHref) {
+            return $routeHref;
+        }
+
+        $path = $this->urlGenerator->generate(
+            $routeHref->getRouteName(),
+            $routeHref->getRouteParameters(),
+            $routeHref->getReferenceType()
+        );
+
+        return new Href(
+            $path,
+            $routeHref->isTemplated()
+        );
     }
 }

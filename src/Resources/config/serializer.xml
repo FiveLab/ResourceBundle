@@ -14,6 +14,7 @@
 
         <parameter key="fivelab.resource.serializer.event_listener.generate_symfony_routes.class">FiveLab\Bundle\ResourceBundle\Resource\EventListener\GenerateSymfonyRouteHrefListener</parameter>
         <parameter key="fivelab.resource.serializer.event_listener.symfony_granted_relation.class">FiveLab\Bundle\ResourceBundle\Resource\EventListener\SymfonyGrantedRelationListener</parameter>
+        <parameter key="fivelab.resource.serializer.event_listener.symfony_granted_action.class">FiveLab\Bundle\ResourceBundle\Resource\EventListener\SymfonyGrantedActionListener</parameter>
     </parameters>
 
     <services>
@@ -59,6 +60,11 @@
         </service>
 
         <service id="fivelab.resource.serializer.event_listener.symfony_granted_relation" class="%fivelab.resource.serializer.event_listener.symfony_granted_relation.class%" abstract="true">
+            <argument type="service" id="security.authorization_checker"/>
+            <tag name="kernel.event_listener" event="fivelab.serializer.normalization.before" method="onBeforeNormalization" priority="128"/>
+        </service>
+
+        <service id="fivelab.resource.serializer.event_listener.symfony_granted_action" class="%fivelab.resource.serializer.event_listener.symfony_granted_action.class%">
             <argument type="service" id="security.authorization_checker"/>
             <tag name="kernel.event_listener" event="fivelab.serializer.normalization.before" method="onBeforeNormalization" priority="128"/>
         </service>

@@ -9,9 +9,9 @@
  * file that was distributed with this source code
  */
 
-namespace FiveLab\Bundle\ResourceBundle\Tests\Resource\Relation\Href;
+namespace FiveLab\Bundle\ResourceBundle\Tests\Resource\Href;
 
-use FiveLab\Bundle\ResourceBundle\Resource\Relation\Href\SymfonyRouteHref;
+use FiveLab\Bundle\ResourceBundle\Resource\Href\SymfonyRouteHref;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -25,7 +25,7 @@ class SymfonyRouteHrefTest extends TestCase
      */
     public function shouldSuccessCreate(): void
     {
-        $href = new SymfonyRouteHref('route_name', ['attr'], true, UrlGeneratorInterface::NETWORK_PATH);
+        $href = new \FiveLab\Bundle\ResourceBundle\Resource\Href\SymfonyRouteHref('route_name', ['attr'], true, UrlGeneratorInterface::NETWORK_PATH);
 
         self::assertEquals('route_name', $href->getRouteName());
         self::assertEquals(['attr'], $href->getRouteParameters());
@@ -37,7 +37,7 @@ class SymfonyRouteHrefTest extends TestCase
      * @test
      *
      * @expectedException \LogicException
-     * @expectedExceptionMessage The method FiveLab\Bundle\ResourceBundle\Resource\Relation\Href\SymfonyRouteHref::getPath does not support.
+     * @expectedExceptionMessage The method FiveLab\Bundle\ResourceBundle\Resource\Href\SymfonyRouteHref::getPath does not support.
      */
     public function shouldFailGetPath(): void
     {

@@ -15,15 +15,9 @@
         <parameter key="fivelab.resource.serializer.hateoas_json.class">FiveLab\Component\Resource\Serializers\Hateoas\HateoasSerializer</parameter>
         <parameter key="fivelab.resource.serializer.hateoas_json.supportable.class">FiveLab\Component\Resource\Serializer\Resolver\AcceptFormatSupportable</parameter>
 
-        <parameter key="fivelab.resource.serializer.hateoas_xml.class">FiveLab\Component\Resource\Serializers\Hateoas\HateoasSerializer</parameter>
-        <parameter key="fivelab.resource.serializer.hateoas_xml.supportable.class">FiveLab\Component\Resource\Serializer\Resolver\AcceptFormatSupportable</parameter>
-
         <!-- Vnd.Error -->
         <parameter key="fivelab.resource.serializer.vnd_error_json.class">FiveLab\Component\Resource\Serializers\VndError\VndErrorSerializer</parameter>
         <parameter key="fivelab.resource.serializer.vnd_error_json.supportable.class">FiveLab\Component\Resource\Serializer\Resolver\AcceptFormatSupportable</parameter>
-
-        <parameter key="fivelab.resource.serializer.vnd_error_xml.class">FiveLab\Component\Resource\Serializers\VndError\VndErrorSerializer</parameter>
-        <parameter key="fivelab.resource.serializer.vnd_error_xml.supportable.class">FiveLab\Component\Resource\Serializer\Resolver\AcceptFormatSupportable</parameter>
     </parameters>
     
     <services>
@@ -37,18 +31,6 @@
         <service id="fivelab.resource.serializer.web_api_json.supportable" class="%fivelab.resource.serializer.web_api_json.supportable.class%" public="false">
             <argument type="collection">
                 <argument>application/json</argument>
-            </argument>
-        </service>
-
-        <service id="fivelab.resource.serializer.web_api_xml" class="%fivelab.resource.serializer.web_api_xml.class%" public="false">
-            <argument type="service" id="fivelab.resource.serializer"/>
-            <argument>xml</argument>
-            <tag name="resource.serializer" supportable="fivelab.resource.serializer.web_api_xml.supportable"/>
-        </service>
-
-        <service id="fivelab.resource.serializer.web_api_xml.supportable" class="%fivelab.resource.serializer.web_api_xml.supportable.class%" public="false">
-            <argument type="collection">
-                <argument>application/xml</argument>
             </argument>
         </service>
 
@@ -69,22 +51,6 @@
             </argument>
         </service>
 
-        <service id="fivelab.resource.serializer.hateoas_xml" class="%fivelab.resource.serializer.hateoas_xml.class%" public="false">
-            <argument type="service" id="fivelab.resource.serializer"/>
-            <argument>xml</argument>
-            <tag name="resource.serializer" supportable="fivelab.resource.serializer.hateoas_xml.supportable"/>
-        </service>
-
-        <service id="fivelab.resource.serializer.hateoas_xml.supportable" class="%fivelab.resource.serializer.hateoas_xml.supportable.class%" public="false">
-            <argument type="collection">
-                <argument>application/hal+xml</argument>
-            </argument>
-            <argument type="collection"/>
-            <argument type="collection">
-                <argument>FiveLab\Component\Resource\Resource\Error\ErrorResourceInterface</argument>
-            </argument>
-        </service>
-
         <!-- Vnd.Error -->
         <service id="fivelab.resource.serializer.vnd_error_json" class="%fivelab.resource.serializer.vnd_error_json.class%">
             <argument type="service" id="fivelab.resource.serializer"/>
@@ -95,21 +61,6 @@
         <service id="fivelab.resource.serializer.vnd_error_json.supportable" class="%fivelab.resource.serializer.vnd_error_json.supportable.class%">
             <argument type="collection">
                 <argument>application/vnd.error+json</argument>
-            </argument>
-            <argument type="collection">
-                <argument>FiveLab\Component\Resource\Resource\Error\ErrorResourceInterface</argument>
-            </argument>
-        </service>
-
-        <service id="fivelab.resource.serializer.vnd_error_xml" class="%fivelab.resource.serializer.vnd_error_xml.class%">
-            <argument type="service" id="fivelab.resource.serializer"/>
-            <argument>xml</argument>
-            <tag name="resource.serializer" supportable="fivelab.resource.serializer.vnd_error_xml.supportable"/>
-        </service>
-
-        <service id="fivelab.resource.serializer.vnd_error_xml.supportable" class="%fivelab.resource.serializer.vnd_error_xml.supportable.class%">
-            <argument type="collection">
-                <argument>application/vnd.error+xml</argument>
             </argument>
             <argument type="collection">
                 <argument>FiveLab\Component\Resource\Resource\Error\ErrorResourceInterface</argument>

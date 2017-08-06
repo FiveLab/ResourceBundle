@@ -11,7 +11,7 @@ declare(strict_types = 1);
  * file that was distributed with this source code
  */
 
-namespace FiveLab\Bundle\ResourceBundle\Resource\Relation\Href;
+namespace FiveLab\Bundle\ResourceBundle\Resource\Href;
 
 use FiveLab\Component\Resource\Resource\Href\HrefInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;

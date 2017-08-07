@@ -10,7 +10,6 @@
         <parameter key="fivelab.resource.serializer.normalizer.object.class">FiveLab\Component\Resource\Serializer\Normalizer\ObjectNormalizer</parameter>
         <parameter key="fivelab.resource.serializer.normalizer.datetime.class">Symfony\Component\Serializer\Normalizer\DateTimeNormalizer</parameter>
         <parameter key="fivelab.resource.serializer.encoder.json.class">Symfony\Component\Serializer\Encoder\JsonEncoder</parameter>
-        <parameter key="fivelab.resource.serializer.encoder.xml.class">Symfony\Component\Serializer\Encoder\XmlEncoder</parameter>
 
         <parameter key="fivelab.resource.serializer.event_listener.generate_symfony_routes.class">FiveLab\Bundle\ResourceBundle\Resource\EventListener\GenerateSymfonyRouteHrefListener</parameter>
         <parameter key="fivelab.resource.serializer.event_listener.symfony_granted_relation.class">FiveLab\Bundle\ResourceBundle\Resource\EventListener\SymfonyGrantedRelationListener</parameter>
@@ -40,10 +39,6 @@
         </service>
 
         <service id="fivelab.resource.serializer.encoder.json" class="%fivelab.resource.serializer.encoder.json.class%" public="false">
-            <tag name="resource.serializer.encoder"/>
-        </service>
-
-        <service id="fivelab.resource.serializer.encoder.xml" class="%fivelab.resource.serializer.encoder.xml.class%" public="false">
             <tag name="resource.serializer.encoder"/>
         </service>
 

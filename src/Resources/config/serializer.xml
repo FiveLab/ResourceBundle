@@ -59,7 +59,7 @@
             <tag name="kernel.event_listener" event="fivelab.serializer.normalization.before" method="onBeforeNormalization" priority="-128"/>
         </service>
 
-        <service id="fivelab.resource.serializer.event_listener.symfony_granted_relation" class="%fivelab.resource.serializer.event_listener.symfony_granted_relation.class%" abstract="true">
+        <service id="fivelab.resource.serializer.event_listener.symfony_granted_relation" class="%fivelab.resource.serializer.event_listener.symfony_granted_relation.class%">
             <argument type="service" id="security.authorization_checker"/>
             <tag name="kernel.event_listener" event="fivelab.serializer.normalization.before" method="onBeforeNormalization" priority="128"/>
         </service>

@@ -81,18 +81,17 @@ class ResourceExtension extends ConfigurableExtension
             if (!interface_exists(ValidatorInterface::class)) {
                 throw new \RuntimeException('The validation listener is enabled but the Symfony/Validator not installed. Please install Symfony/Validator package.');
             }
-
-            $container->getDefinition('fivelab.resource.event_listener.validate_resource')
-                ->setAbstract(false);
+        } else {
+            $container->removeDefinition('fivelab.resource.event_listener.validate_resource');
         }
 
         if ($this->isConfigEnabled($container, $listenersConfig['symfony_security'])) {
             if (!interface_exists(AuthorizationCheckerInterface::class)) {
                 throw new \RuntimeException('The security listener is enabled but the Symfony/Security not installed. Please install Symfony/Security package.');
             }
-
-            $container->getDefinition('fivelab.resource.serializer.event_listener.symfony_granted_relation')
-                ->setAbstract(false);
+        } else {
+            $container->removeDefinition('fivelab.resource.serializer.event_listener.symfony_granted_relation');
+            $container->removeDefinition('fivelab.resource.serializer.event_listener.symfony_granted_action');
         }
     }
 

@@ -43,7 +43,7 @@
             <tag name="kernel.event_listener" event="kernel.view" method="onKernelView"/>
         </service>
 
-        <service id="fivelab.resource.event_listener.validate_resource" class="%fivelab.resource.event_listener.validate_resource.class%" abstract="true">
+        <service id="fivelab.resource.event_listener.validate_resource" class="%fivelab.resource.event_listener.validate_resource.class%">
             <argument type="service" id="validator"/>
             <tag name="kernel.event_listener" event="kernel.controller_arguments" method="onKernelControllerArguments"/>
         </service>
@@ -56,7 +56,7 @@
             <argument>%kernel.debug%</argument>
         </service>
 
-        <service id="fivelab.resource.event_listener.exception_logging" class="%fivelab.resource.event_listener.exception_logging.class%" abstract="true">
+        <service id="fivelab.resource.event_listener.exception_logging" class="%fivelab.resource.event_listener.exception_logging.class%">
             <argument type="service" id="fivelab.resource.event_listener.exception"/>
             <argument type="service" id="logger" on-invalid="null"/>
             <argument/>
@@ -65,7 +65,7 @@
         <!-- Error presentation factory -->
         <service id="fivelab.resource.error_presentation_factory" class="%fivelab.resource.error_presentation_factory.class%"/>
 
-        <service id="fivelab.resource.error_presentation_factory.validation_failed" class="%fivelab.resource.error_presentation_factory.validation_failed.class%" public="false" abstract="true">
+        <service id="fivelab.resource.error_presentation_factory.validation_failed" class="%fivelab.resource.error_presentation_factory.validation_failed.class%" public="false">
             <argument>Validation failed.</argument>
             <argument>ValidationFailed</argument>
             <tag name="resource.error_presentation"/>

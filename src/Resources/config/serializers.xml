@@ -81,10 +81,10 @@
         <service id="fivelab.resource.serializer.vnd_error_json" class="%fivelab.resource.serializer.vnd_error_json.class%">
             <argument type="service" id="fivelab.resource.serializer"/>
             <argument type="collection">
-                <argument type="service" id="fivelab.resource.serializer.vnd_error.normalizer.error_resource_object"/>
-                <argument type="service" id="fivelab.resource.serializer.vnd_error.normalizer.error_collection_object"/>
                 <argument type="service" id="fivelab.resource.serializer.vnd_error.normalizer.relation_object"/>
                 <argument type="service" id="fivelab.resource.serializer.vnd_error.normalizer.relation_collection_object"/>
+                <argument type="service" id="fivelab.resource.serializer.vnd_error.normalizer.error_collection_object"/>
+                <argument type="service" id="fivelab.resource.serializer.vnd_error.normalizer.error_resource_object"/>
             </argument>
             <argument>json</argument>
             <tag name="resource.serializer" supportable="fivelab.resource.serializer.vnd_error_json.supportable"/>

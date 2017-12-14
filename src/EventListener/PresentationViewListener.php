@@ -68,24 +68,26 @@ class PresentationViewListener
             return;
         }
 
-        $acceptableMediaTypes = $event->getRequest()->getAcceptableContentTypes();
-        $serializer = $this->serializerResolver->resolveByMediaTypes(
-            get_class($presentation->getResource()),
-            $acceptableMediaTypes,
-            $acceptableMediaType
-        );
-
         $data = null;
+        $headers = [];
 
         if ($presentation->getResource()) {
+            $acceptableMediaTypes = $event->getRequest()->getAcceptableContentTypes();
+            $serializer = $this->serializerResolver->resolveByMediaTypes(
+                get_class($presentation->getResource()),
+                $acceptableMediaTypes,
+                $acceptableMediaType
+            );
+
             $serializationContext = $this->serializationContextCollector->collect();
             $data = $serializer->serialize($presentation->getResource(), $serializationContext);
+            $headers = [
+                'Content-Type' => $acceptableMediaType,
+            ];
         }
 
         $response = new Response($data, $presentation->getStatusCode());
-        $response->headers->add([
-            'Content-Type' => $acceptableMediaType,
-        ]);
+        $response->headers->add($headers);
 
         $event->setResponse($response);
     }

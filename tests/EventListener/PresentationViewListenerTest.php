@@ -70,15 +70,18 @@ class PresentationViewListenerTest extends TestCase
      */
     public function shouldSuccessProcessWithoutResource(): void
     {
-        $presentation = PresentationFactory::create(200);
+        $presentation = PresentationFactory::create(204);
 
         $event = $this->createEvent(['application/some'], $presentation);
+
+        $this->serializerResolver->expects(self::never())
+            ->method('resolveByMediaTypes');
 
         $this->listener->onKernelView($event);
 
         self::assertTrue($event->hasResponse());
 
-        self::assertEquals(200, $event->getResponse()->getStatusCode());
+        self::assertEquals(204, $event->getResponse()->getStatusCode());
     }
 
     /**

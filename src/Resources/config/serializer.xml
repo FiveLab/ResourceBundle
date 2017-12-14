@@ -38,13 +38,20 @@
             <tag name="resource.serializer.normalizer"/>
         </service>
 
+        <service id="fivelab.resource.serializer.normalizer.array" class="Symfony\Component\Serializer\Normalizer\ArrayDenormalizer" public="false">
+            <call method="setSerializer">
+                <argument type="service" id="fivelab.resource.serializer"/>
+            </call>
+            <tag name="resource.serializer.normalizer"/>
+        </service>
+
         <service id="fivelab.resource.serializer.encoder.json" class="%fivelab.resource.serializer.encoder.json.class%" public="false">
             <tag name="resource.serializer.encoder"/>
         </service>
 
         <service id="fivelab.resource.serializer" class="%fivelab.resource.serializer.class%">
-            <argument type="collection"/>
-            <argument type="collection"/>
+            <argument type="collection"/> <!-- Normalizers: Will be populated on compilers -->
+            <argument type="collection"/> <!-- Encoders: Will be populated on compilers -->
             <argument type="service" id="fivelab.resource.serializer.event_dispatcher"/>
         </service>
 

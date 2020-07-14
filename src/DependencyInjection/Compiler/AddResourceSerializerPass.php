@@ -39,15 +39,15 @@ class AddResourceSerializerPass implements CompilerPassInterface
             try {
                 $attributes = $tags[0];
 
-                if (!array_key_exists('supportable', $attributes)) {
+                if (!\array_key_exists('supportable', $attributes)) {
                     throw new \RuntimeException('The resource serializer should define with supportable instance. Please add the "supportable" attribute to "resource.assembler".');
                 }
 
                 $serializerDefinition = $container->getDefinition($serviceId);
                 $serializerClass = $container->getParameterBag()->resolveValue($serializerDefinition->getClass());
 
-                if (!is_a($serializerClass, ResourceSerializerInterface::class, true)) {
-                    throw new \RuntimeException(sprintf(
+                if (!\is_a($serializerClass, ResourceSerializerInterface::class, true)) {
+                    throw new \RuntimeException(\sprintf(
                         'The resource serializer should implement "%s".',
                         ResourceSerializerInterface::class
                     ));
@@ -60,7 +60,7 @@ class AddResourceSerializerPass implements CompilerPassInterface
                     new Reference($serviceId),
                 ]);
             } catch (\Exception $e) {
-                throw new \RuntimeException(sprintf(
+                throw new \RuntimeException(\sprintf(
                     'Can\'t compile resource serializer with service id "%s".',
                     $serviceId
                 ), 0, $e);

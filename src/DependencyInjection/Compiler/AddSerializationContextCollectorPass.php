@@ -40,8 +40,8 @@ class AddSerializationContextCollectorPass implements CompilerPassInterface
                 $collectorDefinition = $container->getDefinition($serviceId);
                 $collectorClass = $container->getParameterBag()->resolveValue($collectorDefinition->getClass());
 
-                if (!is_a($collectorClass, SerializationContextCollectorInterface::class, true)) {
-                    throw new \RuntimeException(sprintf(
+                if (!\is_a($collectorClass, SerializationContextCollectorInterface::class, true)) {
+                    throw new \RuntimeException(\sprintf(
                         'The serialization context collector should implement "%s".',
                         SerializationContextCollectorInterface::class
                     ));
@@ -51,7 +51,7 @@ class AddSerializationContextCollectorPass implements CompilerPassInterface
                     new Reference($serviceId),
                 ]);
             } catch (\Exception $e) {
-                throw new \RuntimeException(sprintf(
+                throw new \RuntimeException(\sprintf(
                     'Can\'t compile resource serialization collector with service id "%s".',
                     $serviceId
                 ), 0, $e);

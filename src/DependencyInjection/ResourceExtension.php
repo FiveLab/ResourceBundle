@@ -78,7 +78,7 @@ class ResourceExtension extends ConfigurableExtension
             ->replaceArgument(3, $listenersConfig['exception']['debug_parameter']);
 
         if ($this->isConfigEnabled($container, $listenersConfig['validation'])) {
-            if (!interface_exists(ValidatorInterface::class)) {
+            if (!\interface_exists(ValidatorInterface::class)) {
                 throw new \RuntimeException('The validation listener is enabled but the Symfony/Validator not installed. Please install Symfony/Validator package.');
             }
         } else {
@@ -86,12 +86,16 @@ class ResourceExtension extends ConfigurableExtension
         }
 
         if ($this->isConfigEnabled($container, $listenersConfig['symfony_security'])) {
-            if (!interface_exists(AuthorizationCheckerInterface::class)) {
+            if (!\interface_exists(AuthorizationCheckerInterface::class)) {
                 throw new \RuntimeException('The security listener is enabled but the Symfony/Security not installed. Please install Symfony/Security package.');
             }
         } else {
             $container->removeDefinition('fivelab.resource.serializer.event_listener.symfony_granted_relation');
             $container->removeDefinition('fivelab.resource.serializer.event_listener.symfony_granted_action');
+        }
+
+        if (!$this->isConfigEnabled($container, $listenersConfig['normalize_resource'])) {
+            $container->removeDefinition('fivelab.resource.event_listener.normalize_resource');
         }
     }
 
@@ -102,11 +106,8 @@ class ResourceExtension extends ConfigurableExtension
      * @param array            $exceptionListenerConfig
      * @param ContainerBuilder $container
      */
-    private function configureExceptionListener(
-        array $loggingConfig,
-        array $exceptionListenerConfig,
-        ContainerBuilder $container
-    ): void {
+    private function configureExceptionListener(array $loggingConfig, array $exceptionListenerConfig, ContainerBuilder $container): void
+    {
         if ($this->isConfigEnabled($container, $loggingConfig)) {
             $definition = $container
                 ->getDefinition('fivelab.resource.event_listener.exception_logging')
@@ -122,7 +123,7 @@ class ResourceExtension extends ConfigurableExtension
             ->replaceArgument(3, $exceptionListenerConfig['debug_parameter']);
 
         $definition->addTag('kernel.event_listener', [
-            'event' => KernelEvents::EXCEPTION,
+            'event'  => KernelEvents::EXCEPTION,
             'method' => 'onKernelException',
         ]);
     }

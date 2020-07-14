@@ -47,6 +47,22 @@ This library is under the MIT license. See the complete license in library
 LICENSE
 ```
 
+Development
+-----------
+
+For easy development you can use our `Dockerfile`:
+
+```shell script
+docker build -t fivelab-resource-bundle .
+docker run -it -v $(pwd):/code fivelab-resource-bundle bash
+```
+
+After run docker container, please install vendors:
+
+```shell script
+composer install
+```
+
 Reporting an issue or a feature request
 ---------------------------------------
 

@@ -40,8 +40,8 @@ class AddErrorPresentationFactoryPass implements CompilerPassInterface
                 $factoryDefinition = $container->getDefinition($serviceId);
                 $factoryClass = $container->getParameterBag()->resolveValue($factoryDefinition->getClass());
 
-                if (!is_a($factoryClass, ErrorPresentationFactoryInterface::class, true)) {
-                    throw new \RuntimeException(sprintf(
+                if (!\is_a($factoryClass, ErrorPresentationFactoryInterface::class, true)) {
+                    throw new \RuntimeException(\sprintf(
                         'The error presentation factory should implement "%s".',
                         ErrorPresentationFactoryInterface::class
                     ));
@@ -49,7 +49,7 @@ class AddErrorPresentationFactoryPass implements CompilerPassInterface
 
                 $factoryChain->addMethodCall('add', [new Reference($serviceId)]);
             } catch (\Exception $e) {
-                throw new \RuntimeException(sprintf(
+                throw new \RuntimeException(\sprintf(
                     'Cannot compile error presentation factory with id "%s".',
                     $serviceId
                 ), 0, $e);

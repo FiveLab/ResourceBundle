@@ -35,12 +35,12 @@ class SymfonyRouteHrefTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \LogicException
-     * @expectedExceptionMessage The method FiveLab\Bundle\ResourceBundle\Resource\Href\SymfonyRouteHref::getPath does not support.
      */
     public function shouldFailGetPath(): void
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('The method FiveLab\Bundle\ResourceBundle\Resource\Href\SymfonyRouteHref::getPath does not support.');
+
         $href = new SymfonyRouteHref('route_name');
 
         $href->getPath();

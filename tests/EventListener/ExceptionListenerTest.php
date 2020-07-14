@@ -20,6 +20,7 @@ use FiveLab\Component\Resource\Serializer\Context\ResourceSerializationContext;
 use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerNotFoundException;
 use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerResolverInterface;
 use FiveLab\Component\Resource\Serializer\ResourceSerializerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,17 +33,17 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 class ExceptionListenerTest extends TestCase
 {
     /**
-     * @var ErrorPresentationFactoryInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ErrorPresentationFactoryInterface|MockObject
      */
     private $errorPresentationFactory;
 
     /**
-     * @var ResourceSerializerResolverInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ResourceSerializerResolverInterface|MockObject
      */
     private $serializerResolver;
 
     /**
-     * @var SerializationContextCollectorInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var SerializationContextCollectorInterface|MockObject
      */
     private $serializationContextCollector;
 
@@ -193,17 +194,14 @@ class ExceptionListenerTest extends TestCase
     /**
      * Create event for testing exception listener
      *
-     * @param array $acceptableMediaTypes
+     * @param array      $acceptableMediaTypes
      * @param \Exception $exception
-     * @param array $query
+     * @param array      $query
      *
      * @return GetResponseForExceptionEvent
      */
-    private function createEvent(
-        array $acceptableMediaTypes,
-        \Exception $exception,
-        array $query = []
-    ): GetResponseForExceptionEvent {
+    private function createEvent(array $acceptableMediaTypes, \Exception $exception, array $query = []): GetResponseForExceptionEvent
+    {
         $request = new Request(
             $query,
             [],

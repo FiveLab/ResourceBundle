@@ -2,6 +2,8 @@ language: php
 
 php:
     - 7.1
+    - 7.2
+    - 7.3
 
 before_script:
     # Install composer
@@ -10,5 +12,5 @@ before_script:
 
 script:
     - ./bin/phpmetrics src
-    - ./bin/phpcs --standard=vendor/escapestudios/symfony2-coding-standard/Symfony2/ src/ tests/
+    - ./bin/phpcs --standard=vendor/escapestudios/symfony2-coding-standard/Symfony/ src/ tests/
     - ./bin/phpunit

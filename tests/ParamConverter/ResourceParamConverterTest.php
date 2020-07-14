@@ -11,6 +11,7 @@
 
 namespace FiveLab\Bundle\ResourceBundle\Tests\ParamConverter;
 
+use FiveLab\Bundle\ResourceBundle\Exception\MissingContentInRequestException;
 use FiveLab\Bundle\ResourceBundle\ParamConverter\ResourceParamConverter;
 use FiveLab\Component\Resource\Resource\ResourceInterface;
 use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContextCollectorInterface;
@@ -100,12 +101,12 @@ class ResourceParamConverterTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \FiveLab\Bundle\ResourceBundle\Exception\MissingContentInRequestException
-     * @expectedExceptionMessage Missing content in request.
      */
     public function shouldThrowExceptionOnConvertForRequiredValueWithoutContent(): void
     {
+        $this->expectException(MissingContentInRequestException::class);
+        $this->expectExceptionMessage('Missing content in request.');
+
         $request = $this->createRequest('');
         $config = new ParamConverter([
             'class' => ResourceInterface::class,

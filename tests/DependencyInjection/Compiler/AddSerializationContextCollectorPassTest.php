@@ -83,12 +83,12 @@ class AddSerializationContextCollectorPassTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Can't compile resource serialization collector with service id "collector.custom".
      */
     public function shouldFailIfCollectorNotImplementInterface(): void
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Can\'t compile resource serialization collector with service id "collector.custom".');
+
         $collectorDefinition = (new Definition(\stdClass::class))
             ->addTag('resource.serializer.collector');
 

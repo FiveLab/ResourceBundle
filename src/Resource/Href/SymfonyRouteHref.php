@@ -51,12 +51,8 @@ class SymfonyRouteHref implements HrefInterface
      * @param bool   $templated
      * @param int    $referenceType
      */
-    public function __construct(
-        string $routeName,
-        array $routeParameters = [],
-        bool $templated = false,
-        int $referenceType = UrlGeneratorInterface::ABSOLUTE_URL
-    ) {
+    public function __construct(string $routeName, array $routeParameters = [], bool $templated = false, int $referenceType = UrlGeneratorInterface::ABSOLUTE_URL)
+    {
         $this->routeName = $routeName;
         $this->routeParameters = $routeParameters;
         $this->referenceType = $referenceType;
@@ -108,7 +104,7 @@ class SymfonyRouteHref implements HrefInterface
      */
     public function getPath(): string
     {
-        throw new \LogicException(sprintf(
+        throw new \LogicException(\sprintf(
             'The method %s does not support.',
             __METHOD__
         ));

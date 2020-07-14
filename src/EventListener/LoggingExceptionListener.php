@@ -46,11 +46,8 @@ class LoggingExceptionListener
      * @param LoggerInterface   $logger
      * @param string            $level
      */
-    public function __construct(
-        ExceptionListener $exceptionListener,
-        LoggerInterface $logger = null,
-        string $level = LogLevel::CRITICAL
-    ) {
+    public function __construct(ExceptionListener $exceptionListener, LoggerInterface $logger = null, string $level = LogLevel::CRITICAL)
+    {
         $this->logger = $logger;
         $this->originListener = $exceptionListener;
         $this->level = $level;
@@ -84,9 +81,9 @@ class LoggingExceptionListener
             return;
         }
 
-        $message = sprintf(
+        $message = \sprintf(
             'Exception thrown when handling an exception (%s: %s at %s line %s)',
-            get_class($exception),
+            \get_class($exception),
             $exception->getMessage(),
             $exception->getFile(),
             $exception->getLine()

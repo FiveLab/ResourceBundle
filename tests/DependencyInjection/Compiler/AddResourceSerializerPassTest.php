@@ -84,12 +84,12 @@ class AddResourceSerializerPassTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Can't compile resource serializer with service id "serializer.custom".
      */
     public function shouldFailIfSupportableNotProvided(): void
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Can\'t compile resource serializer with service id "serializer.custom".');
+
         $serializer = $this->createMock(ResourceSerializerInterface::class);
         $serializerClass = get_class($serializer);
 
@@ -107,12 +107,12 @@ class AddResourceSerializerPassTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Can't compile resource serializer with service id "serializer.custom".
      */
     public function shouldFailIfSerializerNotSupportRequiredInterface(): void
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Can\'t compile resource serializer with service id "serializer.custom".');
+
         $factoryDefinition = (new Definition(\stdClass::class))
             ->addTag('resource.serializer', ['supportable' => 'resource.serializer.supportable']);
 

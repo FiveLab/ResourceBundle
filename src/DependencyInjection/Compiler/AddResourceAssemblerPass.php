@@ -39,15 +39,15 @@ class AddResourceAssemblerPass implements CompilerPassInterface
             try {
                 $attributes = $tags[0];
 
-                if (!array_key_exists('supportable', $attributes)) {
+                if (!\array_key_exists('supportable', $attributes)) {
                     throw new \RuntimeException('The resource assembler should define with supportable instance. Please add the "supportable" attribute to "resource.assembler".');
                 }
 
                 $assemblerDefinition = $container->getDefinition($serviceId);
                 $assemblerClass = $container->getParameterBag()->resolveValue($assemblerDefinition->getClass());
 
-                if (!is_a($assemblerClass, ResourceAssemblerInterface::class, true)) {
-                    throw new \RuntimeException(sprintf(
+                if (!\is_a($assemblerClass, ResourceAssemblerInterface::class, true)) {
+                    throw new \RuntimeException(\sprintf(
                         'The resource assembler should implement "%s".',
                         ResourceAssemblerInterface::class
                     ));
@@ -60,7 +60,7 @@ class AddResourceAssemblerPass implements CompilerPassInterface
                     new Reference($serviceId),
                 ]);
             } catch (\Exception $e) {
-                throw new \RuntimeException(sprintf(
+                throw new \RuntimeException(\sprintf(
                     'Can\'t compile resource assembler with service id "%s".',
                     $serviceId
                 ), 0, $e);

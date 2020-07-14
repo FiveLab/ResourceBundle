@@ -79,7 +79,7 @@ class SymfonyGrantedActionListenerTest extends TestCase
             ->method('isGranted')
             ->with(self::logicalOr('SOME1', 'SOME2'), (object) ['some' => 'value'])
             ->willReturnCallback(function ($attribute) {
-                if ($attribute === 'SOME1') {
+                if ('SOME1' === $attribute) {
                     return false;
                 }
 

@@ -16,6 +16,7 @@
         <parameter key="fivelab.resource.event_listener.validate_resource.class">FiveLab\Bundle\ResourceBundle\EventListener\ValidateResourceListener</parameter>
         <parameter key="fivelab.resource.event_listener.exception.class">FiveLab\Bundle\ResourceBundle\EventListener\ExceptionListener</parameter>
         <parameter key="fivelab.resource.event_listener.exception_logging.class">FiveLab\Bundle\ResourceBundle\EventListener\LoggingExceptionListener</parameter>
+        <parameter key="fivelab.resource.event_listener.normalize_resource.class">FiveLab\Component\Resource\Resource\EventListener\NormalizeNormalizableResourcesListener</parameter>
         <parameter key="fivelab.resource.param_converter.resource.class">FiveLab\Bundle\ResourceBundle\ParamConverter\ResourceParamConverter</parameter>
 
         <parameter key="fivelab.resource.error_presentation_factory.class">FiveLab\Bundle\ResourceBundle\Resource\Error\ErrorPresentationFactoryChain</parameter>
@@ -60,6 +61,10 @@
             <argument type="service" id="fivelab.resource.event_listener.exception"/>
             <argument type="service" id="logger" on-invalid="null"/>
             <argument/>
+        </service>
+
+        <service id="fivelab.resource.event_listener.normalize_resource" class="%fivelab.resource.event_listener.normalize_resource.class%">
+            <tag name="kernel.event_listener" event="fivelab.serializer.denormalization.after" method="onAfterDenormalize"/>
         </service>
 
         <!-- Error presentation factory -->

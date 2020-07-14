@@ -83,12 +83,12 @@ class AddErrorPresentationFactoryPassTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Cannot compile error presentation factory with id "factory.custom".
      */
     public function shouldFailIfFactoryNotImplementInterface(): void
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Cannot compile error presentation factory with id "factory.custom".');
+
         $factoryDefinition = (new Definition(\stdClass::class))
             ->addTag('resource.error_presentation');
 

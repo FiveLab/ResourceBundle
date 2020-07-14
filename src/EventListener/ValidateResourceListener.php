@@ -55,7 +55,7 @@ class ValidateResourceListener
             if ($argument instanceof ResourceInterface) {
                 $violationList = $this->validator->validate($argument);
 
-                if (count($violationList)) {
+                if (\count($violationList)) {
                     throw ViolationListException::create($violationList);
                 }
             }

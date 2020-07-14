@@ -12,6 +12,7 @@
 namespace FiveLab\Bundle\ResourceBundle\Tests\EventListener;
 
 use FiveLab\Bundle\ResourceBundle\EventListener\ValidateResourceListener;
+use FiveLab\Component\Exception\ViolationListException;
 use FiveLab\Component\Resource\Resource\ResourceInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -67,12 +68,12 @@ class ValidateResourceListenerTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \FiveLab\Component\Exception\ViolationListException
-     * @expectedExceptionMessage Not valid. [path]: some-message;
      */
     public function shouldFailProcessIfResourceIsNotValid(): void
     {
+        $this->expectException(ViolationListException::class);
+        $this->expectExceptionMessage('Not valid. [path]: some-message;');
+
         $resource = $this->createMock(ResourceInterface::class);
         $event = $this->createEvent($resource);
 

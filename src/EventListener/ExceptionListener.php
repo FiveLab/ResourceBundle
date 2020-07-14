@@ -61,13 +61,8 @@ class ExceptionListener
      * @param string                                 $debugParameter
      * @param bool                                   $kernelDebug
      */
-    public function __construct(
-        ErrorPresentationFactoryInterface $errorPresentationFactory,
-        ResourceSerializerResolverInterface $serializerResolver,
-        SerializationContextCollectorInterface $serializationContextCollector,
-        string $debugParameter,
-        bool $kernelDebug
-    ) {
+    public function __construct(ErrorPresentationFactoryInterface $errorPresentationFactory, ResourceSerializerResolverInterface $serializerResolver, SerializationContextCollectorInterface $serializationContextCollector, string $debugParameter, bool $kernelDebug)
+    {
         $this->errorPresentationFactory = $errorPresentationFactory;
         $this->serializerResolver = $serializerResolver;
         $this->serializationContextCollector = $serializationContextCollector;
@@ -106,7 +101,7 @@ class ExceptionListener
 
         try {
             $serializer = $this->serializerResolver->resolveByMediaTypes(
-                get_class($errorPresentation->getResource()),
+                \get_class($errorPresentation->getResource()),
                 $request->getAcceptableContentTypes(),
                 $acceptMediaType
             );

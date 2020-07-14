@@ -78,8 +78,8 @@ class SymfonyGrantedRelationListenerTest extends TestCase
         $this->authorizationChecker->expects(self::exactly(2))
             ->method('isGranted')
             ->with(self::logicalOr('SOME1', 'SOME2'), (object) ['some' => 'value'])
-            ->willReturnCallback(function ($attribute) {
-                if ($attribute === 'SOME1') {
+            ->willReturnCallback(static function ($attribute) {
+                if ('SOME1' === $attribute) {
                     return false;
                 }
 

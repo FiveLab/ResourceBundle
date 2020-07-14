@@ -45,10 +45,8 @@ class ResourceParamConverter implements ParamConverterInterface
      * @param ResourceSerializerResolverInterface    $serializerResolver
      * @param SerializationContextCollectorInterface $contextCollector
      */
-    public function __construct(
-        ResourceSerializerResolverInterface $serializerResolver,
-        SerializationContextCollectorInterface $contextCollector
-    ) {
+    public function __construct(ResourceSerializerResolverInterface $serializerResolver, SerializationContextCollectorInterface $contextCollector)
+    {
         $this->serializerResolver = $serializerResolver;
         $this->serializationContextCollector = $contextCollector;
     }
@@ -86,6 +84,6 @@ class ResourceParamConverter implements ParamConverterInterface
      */
     public function supports(ParamConverter $configuration): bool
     {
-        return is_a($configuration->getClass(), ResourceInterface::class, true);
+        return \is_a($configuration->getClass(), ResourceInterface::class, true);
     }
 }

@@ -121,6 +121,16 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                         ->end()
+
+                        ->arrayNode('normalize_resource')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->booleanNode('enabled')
+                                    ->info('Enable normalize normalizable resources listener.')
+                                    ->defaultTrue()
+                                ->end()
+                            ->end()
+                        ->end()
                     ->end()
                 ->end()
 

@@ -43,10 +43,8 @@ class PresentationViewListener
      * @param ResourceSerializerResolverInterface    $serializerResolver
      * @param SerializationContextCollectorInterface $serializationContextCollector
      */
-    public function __construct(
-        ResourceSerializerResolverInterface $serializerResolver,
-        SerializationContextCollectorInterface $serializationContextCollector
-    ) {
+    public function __construct(ResourceSerializerResolverInterface $serializerResolver, SerializationContextCollectorInterface $serializationContextCollector)
+    {
         $this->serializerResolver = $serializerResolver;
         $this->serializationContextCollector = $serializationContextCollector;
     }
@@ -74,7 +72,7 @@ class PresentationViewListener
         if ($presentation->getResource()) {
             $acceptableMediaTypes = $event->getRequest()->getAcceptableContentTypes();
             $serializer = $this->serializerResolver->resolveByMediaTypes(
-                get_class($presentation->getResource()),
+                \get_class($presentation->getResource()),
                 $acceptableMediaTypes,
                 $acceptableMediaType
             );

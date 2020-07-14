@@ -84,12 +84,12 @@ class AddResourceAssemblerPassTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Can't compile resource assembler with service id "assembler.custom".
      */
     public function shouldFailIfSupportableNotProvided(): void
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Can\'t compile resource assembler with service id "assembler.custom".');
+
         $assembler = $this->createMock(ResourceAssemblerInterface::class);
         $assemblerClass = get_class($assembler);
 
@@ -107,12 +107,12 @@ class AddResourceAssemblerPassTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Can't compile resource assembler with service id "assembler.custom".
      */
     public function shouldFailIfAssemblerNotSupportRequiredInterface(): void
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Can\'t compile resource assembler with service id "assembler.custom".');
+
         $factoryDefinition = (new Definition(\stdClass::class))
             ->addTag('resource.assembler', ['supportable' => 'resource.assembler.supportable']);
 

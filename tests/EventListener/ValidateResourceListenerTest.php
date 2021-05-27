@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -12,11 +14,12 @@
 namespace FiveLab\Bundle\ResourceBundle\Tests\EventListener;
 
 use FiveLab\Bundle\ResourceBundle\EventListener\ValidateResourceListener;
-use FiveLab\Component\Exception\ViolationListException;
+use FiveLab\Bundle\ResourceBundle\Exception\ResourceNotValidException;
 use FiveLab\Component\Resource\Resource\ResourceInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\FilterControllerArgumentsEvent;
+use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -28,7 +31,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ValidateResourceListenerTest extends TestCase
 {
     /**
-     * @var ValidatorInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ValidatorInterface|MockObject
      */
     private $validator;
 
@@ -71,9 +74,6 @@ class ValidateResourceListenerTest extends TestCase
      */
     public function shouldFailProcessIfResourceIsNotValid(): void
     {
-        $this->expectException(ViolationListException::class);
-        $this->expectExceptionMessage('Not valid. [path]: some-message;');
-
         $resource = $this->createMock(ResourceInterface::class);
         $event = $this->createEvent($resource);
 
@@ -84,22 +84,25 @@ class ValidateResourceListenerTest extends TestCase
                 new ConstraintViolation('some-message', 'templated message', [], 'root', 'path', 'some'),
             ]));
 
+        $this->expectException(ResourceNotValidException::class);
+        $this->expectExceptionMessage('Resource is\'t valid.');
+
         $this->listener->onKernelControllerArguments($event);
     }
 
     /**
      * Create event
      *
-     * @param array ...$arguments
+     * @param mixed ...$arguments
      *
-     * @return FilterControllerArgumentsEvent
+     * @return ControllerArgumentsEvent
      */
-    private function createEvent(...$arguments): FilterControllerArgumentsEvent
+    private function createEvent(...$arguments): ControllerArgumentsEvent
     {
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = new Request();
 
-        return new FilterControllerArgumentsEvent(
+        return new ControllerArgumentsEvent(
             $kernel,
             [$this, 'controllerAction'],
             $arguments,

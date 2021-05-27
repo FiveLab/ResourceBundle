@@ -1,16 +1,15 @@
 ResourceBundle
 ===============
 
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/b8135dc7-3a24-4641-bdba-44de86dedd8e/mini.png)](https://insight.sensiolabs.com/projects/b8135dc7-3a24-4641-bdba-44de86dedd8e)
-[![Build Status](https://api.travis-ci.org/FiveLab/ResourceBundle.svg?branch=master)](https://travis-ci.org/FiveLab/ResourceBundle)
+[![Build Status](https://github.com/FiveLab/ResourceBundle/workflows/Testing/badge.svg?branch=master)](https://github.com/FiveLab/ResourceBundle/actions)
 
 Integrate the Resource library with Symfony applications.
 
 Requirements
 ------------
 
-* PHP 7.1 or higher
-* Symfony3 or higher
+* PHP 7.4 or higher
+* Symfony 4.4 or higher
 
 Installation
 ------------
@@ -20,7 +19,7 @@ Add ResourceBundle in your composer.json:
 ````json
 {
     "require": {
-        "fivelab/resource-bundle": "~1.0"
+        "fivelab/resource-bundle": "~2.0"
     }
 }
 ````
@@ -30,13 +29,6 @@ Now tell composer to download the library by running the command:
 ```bash
 $ php composer.phar update fivelab/resource-bundle
 ```
-
-Documentation
-----------
-
-The source of the documentation is stored in the `docs` folder in this package:
-
-[Read the Documentation](docs/index.md)
 
 License
 -------

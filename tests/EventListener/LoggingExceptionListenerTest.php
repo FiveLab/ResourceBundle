@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -13,11 +15,12 @@ namespace FiveLab\Bundle\ResourceBundle\Tests\EventListener;
 
 use FiveLab\Bundle\ResourceBundle\EventListener\ExceptionListener;
 use FiveLab\Bundle\ResourceBundle\EventListener\LoggingExceptionListener;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
@@ -26,14 +29,14 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 class LoggingExceptionListenerTest extends TestCase
 {
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|MockObject
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
-     * @var ExceptionListener|\PHPUnit_Framework_MockObject_MockObject
+     * @var ExceptionListener|MockObject
      */
-    private $originListener;
+    private ExceptionListener $originListener;
 
     /**
      * {@inheritdoc}
@@ -54,8 +57,7 @@ class LoggingExceptionListenerTest extends TestCase
 
         $this->originListener->expects(self::once())
             ->method('onKernelException')
-            ->with($event)
-            ->willReturn(null);
+            ->with($event);
 
         $this->logger->expects(self::never())
             ->method('log');
@@ -74,7 +76,7 @@ class LoggingExceptionListenerTest extends TestCase
         $this->originListener->expects(self::once())
             ->method('onKernelException')
             ->with($event)
-            ->willReturnCallback(function (GetResponseForExceptionEvent $event) {
+            ->willReturnCallback(function (ExceptionEvent $event) {
                 $event->setResponse(new Response());
             });
 
@@ -93,7 +95,7 @@ class LoggingExceptionListenerTest extends TestCase
         $this->originListener->expects(self::once())
             ->method('onKernelException')
             ->with($event)
-            ->willReturnCallback(function (GetResponseForExceptionEvent $event) {
+            ->willReturnCallback(function (ExceptionEvent $event) {
                 $event->setResponse(new Response());
             });
 
@@ -111,14 +113,14 @@ class LoggingExceptionListenerTest extends TestCase
      *
      * @param \Exception $exception
      *
-     * @return GetResponseForExceptionEvent
+     * @return ExceptionEvent
      */
-    private function createEvent(\Exception $exception): GetResponseForExceptionEvent
+    private function createEvent(\Exception $exception): ExceptionEvent
     {
         $request = new Request();
 
         $kernel = $this->createMock(HttpKernelInterface::class);
 
-        return new GetResponseForExceptionEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $exception);
+        return new ExceptionEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $exception);
     }
 }

@@ -1,0 +1,70 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="fivelab.resource.serializer.event_listener.generate_symfony_routes.class">FiveLab\Bundle\ResourceBundle\Resource\EventListener\GenerateSymfonyRouteHrefListener</parameter>
+        <parameter key="fivelab.resource.serializer.event_listener.symfony_granted_relation.class">FiveLab\Bundle\ResourceBundle\Resource\EventListener\SymfonyGrantedRelationListener</parameter>
+        <parameter key="fivelab.resource.serializer.event_listener.symfony_granted_action.class">FiveLab\Bundle\ResourceBundle\Resource\EventListener\SymfonyGrantedActionListener</parameter>
+
+        <parameter key="fivelab.resource.event_listener.presentation_view.class">FiveLab\Bundle\ResourceBundle\EventListener\PresentationViewListener</parameter>
+        <parameter key="fivelab.resource.event_listener.validate_resource.class">FiveLab\Bundle\ResourceBundle\EventListener\ValidateResourceListener</parameter>
+        <parameter key="fivelab.resource.event_listener.exception.class">FiveLab\Bundle\ResourceBundle\EventListener\ExceptionListener</parameter>
+        <parameter key="fivelab.resource.event_listener.exception_logging.class">FiveLab\Bundle\ResourceBundle\EventListener\LoggingExceptionListener</parameter>
+        <parameter key="fivelab.resource.event_listener.normalize_resource.class">FiveLab\Component\Resource\Resource\EventListener\NormalizeNormalizableResourcesListener</parameter>
+    </parameters>
+
+    <services>
+        <!-- Serialization event listener -->
+        <service id="fivelab.resource.serializer.event_listener.generate_symfony_routes" class="%fivelab.resource.serializer.event_listener.generate_symfony_routes.class%">
+            <argument type="service" id="router"/>
+            <tag name="kernel.event_listener" event="resource.serializer.before_normalization" method="onBeforeNormalization" priority="-128"/>
+        </service>
+
+        <service id="fivelab.resource.serializer.event_listener.symfony_granted_relation" class="%fivelab.resource.serializer.event_listener.symfony_granted_relation.class%">
+            <argument type="service" id="security.authorization_checker"/>
+            <tag name="kernel.event_listener" event="resource.serializer.before_normalization" method="onBeforeNormalization" priority="128"/>
+        </service>
+
+        <service id="fivelab.resource.serializer.event_listener.symfony_granted_action" class="%fivelab.resource.serializer.event_listener.symfony_granted_action.class%">
+            <argument type="service" id="security.authorization_checker"/>
+            <tag name="kernel.event_listener" event="resource.serializer.before_normalization" method="onBeforeNormalization" priority="128"/>
+        </service>
+
+        <!-- Symfony event listeners -->
+        <service id="fivelab.resource.event_listener.presentation" class="%fivelab.resource.event_listener.presentation_view.class%">
+            <argument type="service" id="fivelab.resource.serializer_resolver"/>
+            <argument type="service" id="fivelab.resource.serializer.context_collector"/>
+            <tag name="kernel.event_listener" event="kernel.view" method="onKernelView"/>
+        </service>
+
+        <service id="fivelab.resource.event_listener.validate_resource" class="%fivelab.resource.event_listener.validate_resource.class%">
+            <argument type="service" id="validator"/>
+            <tag name="kernel.event_listener" event="kernel.controller_arguments" method="onKernelControllerArguments"/>
+        </service>
+
+        <service id="fivelab.resource.event_listener.exception" class="%fivelab.resource.event_listener.exception.class%">
+            <argument type="service" id="fivelab.resource.error_presentation_factory"/>
+            <argument type="service" id="fivelab.resource.serializer_resolver"/>
+            <argument type="service" id="fivelab.resource.serializer.context_collector"/>
+            <argument/>
+            <argument>%kernel.debug%</argument>
+            <tag name="kernel.event_listener" event="kernel.exception" method="onKernelException"/>
+        </service>
+
+        <service
+                id="fivelab.resource.event_listener.exception_logging"
+                class="%fivelab.resource.event_listener.exception_logging.class%"
+                decorates="fivelab.resource.event_listener.exception"
+        >
+            <argument type="service" id="fivelab.resource.event_listener.exception_logging.inner"/>
+            <argument type="service" id="logger" on-invalid="null"/>
+            <argument/>
+        </service>
+
+        <service id="fivelab.resource.event_listener.normalize_resource" class="%fivelab.resource.event_listener.normalize_resource.class%">
+            <tag name="kernel.event_listener" event="resource.serializer.after_denormalization" method="onAfterDenormalize"/>
+        </service>
+    </services>
+</container>

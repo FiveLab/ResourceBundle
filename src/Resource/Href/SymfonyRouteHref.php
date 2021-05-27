@@ -26,30 +26,30 @@ class SymfonyRouteHref implements HrefInterface
     /**
      * @var string
      */
-    private $routeName;
+    private string $routeName;
 
     /**
-     * @var array
+     * @var array<string, string>
      */
-    private $routeParameters;
+    private array $routeParameters;
 
     /**
      * @var int
      */
-    private $referenceType;
+    private int $referenceType;
 
     /**
      * @var bool
      */
-    private $templated;
+    private bool $templated;
 
     /**
      * Constructor.
      *
-     * @param string $routeName
-     * @param array  $routeParameters
-     * @param bool   $templated
-     * @param int    $referenceType
+     * @param string                $routeName
+     * @param array<string, string> $routeParameters
+     * @param bool                  $templated
+     * @param int                   $referenceType
      */
     public function __construct(string $routeName, array $routeParameters = [], bool $templated = false, int $referenceType = UrlGeneratorInterface::ABSOLUTE_URL)
     {
@@ -72,7 +72,7 @@ class SymfonyRouteHref implements HrefInterface
     /**
      * Get route parameters
      *
-     * @return array
+     * @return array<string, string>
      */
     public function getRouteParameters(): array
     {

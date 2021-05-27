@@ -15,7 +15,7 @@ namespace FiveLab\Bundle\ResourceBundle\EventListener;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 /**
  * The listener for logging exception.
@@ -25,26 +25,26 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 class LoggingExceptionListener
 {
     /**
-     * @var LoggerInterface
+     * @var LoggerInterface|null
      */
-    protected $logger;
+    protected ?LoggerInterface $logger;
 
     /**
      * @var string
      */
-    protected $level;
+    protected string $level;
 
     /**
      * @var ExceptionListener
      */
-    private $originListener;
+    private ExceptionListener $originListener;
 
     /**
      * Constructor.
      *
-     * @param ExceptionListener $exceptionListener
-     * @param LoggerInterface   $logger
-     * @param string            $level
+     * @param ExceptionListener    $exceptionListener
+     * @param LoggerInterface|null $logger
+     * @param string               $level
      */
     public function __construct(ExceptionListener $exceptionListener, LoggerInterface $logger = null, string $level = LogLevel::CRITICAL)
     {
@@ -56,9 +56,9 @@ class LoggingExceptionListener
     /**
      * Handle the exception and log message.
      *
-     * @param GetResponseForExceptionEvent $event
+     * @param ExceptionEvent $event
      */
-    public function onKernelException(GetResponseForExceptionEvent $event): void
+    public function onKernelException(ExceptionEvent $event): void
     {
         $this->originListener->onKernelException($event);
 
@@ -67,15 +67,15 @@ class LoggingExceptionListener
             return;
         }
 
-        $this->logException($event->getException());
+        $this->logException($event->getThrowable());
     }
 
     /**
      * Log exception
      *
-     * @param \Exception $exception
+     * @param \Throwable $error
      */
-    protected function logException(\Exception $exception): void
+    protected function logException(\Throwable $error): void
     {
         if (!$this->logger) {
             return;
@@ -83,14 +83,14 @@ class LoggingExceptionListener
 
         $message = \sprintf(
             'Exception thrown when handling an exception (%s: %s at %s line %s)',
-            \get_class($exception),
-            $exception->getMessage(),
-            $exception->getFile(),
-            $exception->getLine()
+            \get_class($error),
+            $error->getMessage(),
+            $error->getFile(),
+            $error->getLine()
         );
 
         $this->logger->log($this->level, $message, [
-            'exception' => $exception,
+            'exception' => $error,
         ]);
     }
 }

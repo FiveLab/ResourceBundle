@@ -18,7 +18,7 @@ use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContext
 use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerNotFoundException;
 use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerResolverInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 /**
  * Event listener for listen kernel exceptions and set the response for send to client.
@@ -30,27 +30,27 @@ class ExceptionListener
     /**
      * @var ErrorPresentationFactoryInterface
      */
-    private $errorPresentationFactory;
+    private ErrorPresentationFactoryInterface $errorPresentationFactory;
 
     /**
      * @var ResourceSerializerResolverInterface
      */
-    private $serializerResolver;
+    private ResourceSerializerResolverInterface $serializerResolver;
 
     /**
      * @var SerializationContextCollectorInterface
      */
-    private $serializationContextCollector;
+    private SerializationContextCollectorInterface $serializationContextCollector;
 
     /**
      * @var string
      */
-    private $debugParameter;
+    private string $debugParameter;
 
     /**
      * @var bool
      */
-    private $kernelDebug;
+    private bool $kernelDebug;
 
     /**
      * Constructor.
@@ -73,9 +73,9 @@ class ExceptionListener
     /**
      * Render the exception for sending to client
      *
-     * @param GetResponseForExceptionEvent $event
+     * @param ExceptionEvent $event
      */
-    public function onKernelException(GetResponseForExceptionEvent $event): void
+    public function onKernelException(ExceptionEvent $event): void
     {
         $request = $event->getRequest();
 
@@ -83,7 +83,7 @@ class ExceptionListener
             return;
         }
 
-        $exception = $event->getException();
+        $exception = $event->getThrowable();
         $errorPresentation = $this->errorPresentationFactory->create($exception);
 
         if (!$errorPresentation) {
@@ -97,13 +97,13 @@ class ExceptionListener
             return;
         }
 
-        $acceptMediaType = null;
+        $acceptedMediaType = null;
 
         try {
             $serializer = $this->serializerResolver->resolveByMediaTypes(
-                \get_class($errorPresentation->getResource()),
+                \get_class($errorPresentation->getResource()), /** @phpstan-ignore-line */
                 $request->getAcceptableContentTypes(),
-                $acceptMediaType
+                $acceptedMediaType
             );
         } catch (ResourceSerializerNotFoundException $e) {
             // Cannot resolve the serializer for accept media types.
@@ -112,10 +112,11 @@ class ExceptionListener
         }
 
         $context = $this->serializationContextCollector->collect();
+        /* @phpstan-ignore-next-line */
         $serializedData = $serializer->serialize($errorPresentation->getResource(), $context);
 
         $response = new Response($serializedData, $errorPresentation->getStatusCode(), [
-            'Content-Type' => $acceptMediaType,
+            'Content-Type' => $acceptedMediaType,
         ]);
 
         $event->setResponse($response);

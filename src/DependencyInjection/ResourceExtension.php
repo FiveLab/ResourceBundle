@@ -17,7 +17,6 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -38,48 +37,72 @@ class ResourceExtension extends ConfigurableExtension
 
     /**
      * {@inheritdoc}
+     *
+     * @param array<string, mixed> $mergedConfig
      */
-    protected function loadInternal(array $config, ContainerBuilder $container): void
+    protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
 
-        $this->configureSerializer($config['serializer'], $container);
-        $this->configureExceptionListener($config['logging'], $config['listeners']['exception'], $container);
-        $this->configureListeners($config['listeners'], $container);
-        $this->configureErrorPresentationFactory($config['error_presentation_factory'], $container);
+        $this->configureExceptionListener($container, $mergedConfig['logging']);
+        $this->configureListeners($container, $mergedConfig['listeners']);
+        $this->configureErrorPresentationFactory($container, $mergedConfig['error_presentation_factory']);
+
+        if ($mergedConfig['serializers']['web_api']['enabled']) {
+            $loader->load('serializers/web-api.xml');
+
+            $container->getDefinition('fivelab.resource.serializer.web_api_json')
+                ->replaceArgument(2, $mergedConfig['serializers']['web_api']['options']);
+        }
+
+        if ($mergedConfig['serializers']['vnd_error']['enabled']) {
+            $loader->load('serializers/vnd-error.xml');
+
+            $container->getDefinition('fivelab.resource.serializer.vnd_error_json')
+                ->replaceArgument(2, $mergedConfig['serializers']['vnd_error']['options']);
+        }
+
+        if ($mergedConfig['serializers']['hateoas']['enabled']) {
+            $loader->load('serializers/hateoas.xml');
+
+            $container->getDefinition('fivelab.resource.serializer.hateoas_json')
+                ->replaceArgument(2, $mergedConfig['serializers']['hateoas']['options']);
+        }
     }
 
     /**
      * Configure error presentation factories
      *
-     * @param array            $factoryConfig
-     * @param ContainerBuilder $container
+     * @param ContainerBuilder     $container
+     * @param array<string, mixed> $factoryConfig
      */
-    private function configureErrorPresentationFactory(array $factoryConfig, ContainerBuilder $container): void
+    private function configureErrorPresentationFactory(ContainerBuilder $container, array $factoryConfig): void
     {
         if ($this->isConfigEnabled($container, $factoryConfig['validation'])) {
             $container->getDefinition('fivelab.resource.error_presentation_factory.validation_failed')
                 ->setAbstract(false)
                 ->replaceArgument(0, $factoryConfig['validation']['message'])
                 ->replaceArgument(1, $factoryConfig['validation']['reason']);
+        } else {
+            $container->removeDefinition('fivelab.resource.error_presentation_factory.validation_failed');
         }
     }
 
     /**
      * Configure listeners
      *
-     * @param array            $listenersConfig
-     * @param ContainerBuilder $container
+     * @param ContainerBuilder     $container
+     * @param array<string, mixed> $listenersConfig
      */
-    private function configureListeners(array $listenersConfig, ContainerBuilder $container): void
+    private function configureListeners(ContainerBuilder $container, array $listenersConfig): void
     {
         $container->getDefinition('fivelab.resource.event_listener.exception')
             ->replaceArgument(3, $listenersConfig['exception']['debug_parameter']);
 
         if ($this->isConfigEnabled($container, $listenersConfig['validation'])) {
             if (!\interface_exists(ValidatorInterface::class)) {
-                throw new \RuntimeException('The validation listener is enabled but the Symfony/Validator not installed. Please install Symfony/Validator package.');
+                throw new \RuntimeException('The validation listener is enabled but the symfony/validator not installed. Please install symfony/validator package.');
             }
         } else {
             $container->removeDefinition('fivelab.resource.event_listener.validate_resource');
@@ -87,7 +110,7 @@ class ResourceExtension extends ConfigurableExtension
 
         if ($this->isConfigEnabled($container, $listenersConfig['symfony_security'])) {
             if (!\interface_exists(AuthorizationCheckerInterface::class)) {
-                throw new \RuntimeException('The security listener is enabled but the Symfony/Security not installed. Please install Symfony/Security package.');
+                throw new \RuntimeException('The security listener is enabled but the symfony/security not installed. Please install symfony/security package.');
             }
         } else {
             $container->removeDefinition('fivelab.resource.serializer.event_listener.symfony_granted_relation');
@@ -102,60 +125,18 @@ class ResourceExtension extends ConfigurableExtension
     /**
      * Configure exception listener
      *
-     * @param array            $loggingConfig
-     * @param array            $exceptionListenerConfig
-     * @param ContainerBuilder $container
+     * @param ContainerBuilder     $container
+     * @param array<string, mixed> $loggingConfig
      */
-    private function configureExceptionListener(array $loggingConfig, array $exceptionListenerConfig, ContainerBuilder $container): void
+    private function configureExceptionListener(ContainerBuilder $container, array $loggingConfig): void
     {
         if ($this->isConfigEnabled($container, $loggingConfig)) {
-            $definition = $container
+            $container
                 ->getDefinition('fivelab.resource.event_listener.exception_logging')
                 ->replaceArgument(2, $loggingConfig['level'])
-                ->setAbstract(false)
                 ->addTag('monolog.logger', ['channel' => $loggingConfig['channel']]);
         } else {
-            $definition = $container->getDefinition('fivelab.resource.event_listener.logging');
+            $container->removeDefinition('fivelab.resource.event_listener.exception_logging');
         }
-
-        $container
-            ->getDefinition('fivelab.resource.event_listener.exception')
-            ->replaceArgument(3, $exceptionListenerConfig['debug_parameter']);
-
-        $definition->addTag('kernel.event_listener', [
-            'event'  => KernelEvents::EXCEPTION,
-            'method' => 'onKernelException',
-        ]);
-    }
-
-    /**
-     * Configure serializer
-     *
-     * @param array            $config
-     * @param ContainerBuilder $container
-     */
-    private function configureSerializer(array $config, ContainerBuilder $container): void
-    {
-        if ($config['metadata_factory']) {
-            $container->setAlias('fivelab.resource.serializer.metadata_factory', $config['metadata_factory']);
-        }
-
-        if ($config['name_converter']) {
-            $container->setAlias('fivelab.resource.serializer.name_converter', $config['name_converter']);
-        }
-
-        if ($config['property_accessor']) {
-            $container->setAlias('fivelab.resource.serializer.property_accessor', $config['property_accessor']);
-        }
-
-        if ($config['property_info']) {
-            $container->setAlias('fivelab.resource.serializer.property_info', $config['property_info']);
-        }
-
-        if ($config['event_dispatcher']) {
-            $container->setAlias('fivelab.resource.serializer.event_dispatcher', $config['event_dispatcher']);
-        }
-
-        $container->setParameter('fivelab.resource.serializer.serialize_null', $config['serialize_null']);
     }
 }

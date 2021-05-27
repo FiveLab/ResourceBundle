@@ -31,7 +31,7 @@ class GenerateSymfonyRouteHrefListener
     /**
      * @var UrlGeneratorInterface
      */
-    private $urlGenerator;
+    private UrlGeneratorInterface $urlGenerator;
 
     /**
      * Constructor.

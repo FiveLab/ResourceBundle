@@ -38,11 +38,6 @@ class FiveLabResourceBundle extends Bundle
         $container->addCompilerPass(new AddResourceSerializerPass());
         $container->addCompilerPass(new AddSerializationContextCollectorPass());
         $container->addCompilerPass(new AddErrorPresentationFactoryPass());
-        $container->addCompilerPass(new SerializerPass(
-            'fivelab.resource.serializer',
-            'resource.serializer.normalizer',
-            'resource.serializer.encoder'
-        ));
     }
 
     /**

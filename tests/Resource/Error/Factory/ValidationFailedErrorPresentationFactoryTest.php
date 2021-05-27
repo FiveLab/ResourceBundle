@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -11,8 +13,8 @@
 
 namespace FiveLab\Bundle\ResourceBundle\Tests\Resource\Error\Factory;
 
+use FiveLab\Bundle\ResourceBundle\Exception\ResourceNotValidException;
 use FiveLab\Bundle\ResourceBundle\Resource\Error\Factory\ValidationFailedErrorPresentationFactory;
-use FiveLab\Component\Exception\ViolationListException;
 use FiveLab\Component\Resource\Resource\Error\ErrorCollection;
 use FiveLab\Component\Resource\Resource\Error\ErrorResource;
 use PHPUnit\Framework\TestCase;
@@ -27,7 +29,7 @@ class ValidationFailedErrorPresentationFactoryTest extends TestCase
     /**
      * @var ValidationFailedErrorPresentationFactory
      */
-    private $factory;
+    private ValidationFailedErrorPresentationFactory $factory;
 
     /**
      * {@inheritdoc}
@@ -64,7 +66,7 @@ class ValidationFailedErrorPresentationFactoryTest extends TestCase
         );
 
         $violationList = new ConstraintViolationList([$violation]);
-        $exception = ViolationListException::create($violationList);
+        $exception = new ResourceNotValidException($violationList);
 
         $expectedError = new ErrorCollection('Validation failed.', 'ValidationFailed');
         $expectedError->addErrors(new ErrorResource('message', null, 'path'));

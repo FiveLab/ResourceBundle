@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -24,7 +26,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
@@ -35,22 +37,22 @@ class ExceptionListenerTest extends TestCase
     /**
      * @var ErrorPresentationFactoryInterface|MockObject
      */
-    private $errorPresentationFactory;
+    private ErrorPresentationFactoryInterface $errorPresentationFactory;
 
     /**
      * @var ResourceSerializerResolverInterface|MockObject
      */
-    private $serializerResolver;
+    private ResourceSerializerResolverInterface $serializerResolver;
 
     /**
      * @var SerializationContextCollectorInterface|MockObject
      */
-    private $serializationContextCollector;
+    private SerializationContextCollectorInterface $serializationContextCollector;
 
     /**
      * @var ExceptionListener
      */
-    private $exceptionListener;
+    private ExceptionListener $exceptionListener;
 
     /**
      * {@inheritdoc}
@@ -198,9 +200,9 @@ class ExceptionListenerTest extends TestCase
      * @param \Exception $exception
      * @param array      $query
      *
-     * @return GetResponseForExceptionEvent
+     * @return ExceptionEvent
      */
-    private function createEvent(array $acceptableMediaTypes, \Exception $exception, array $query = []): GetResponseForExceptionEvent
+    private function createEvent(array $acceptableMediaTypes, \Exception $exception, array $query = []): ExceptionEvent
     {
         $request = new Request(
             $query,
@@ -215,6 +217,6 @@ class ExceptionListenerTest extends TestCase
 
         $kernel = $this->createMock(HttpKernelInterface::class);
 
-        return new GetResponseForExceptionEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $exception);
+        return new ExceptionEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $exception);
     }
 }

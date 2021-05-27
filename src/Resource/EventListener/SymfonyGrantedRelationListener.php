@@ -28,7 +28,7 @@ class SymfonyGrantedRelationListener
     /**
      * @var AuthorizationCheckerInterface
      */
-    private $authorizationChecker;
+    private AuthorizationCheckerInterface $authorizationChecker;
 
     /**
      * Constructor.

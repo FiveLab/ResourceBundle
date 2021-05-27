@@ -32,6 +32,10 @@ class AddResourceSerializerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container): void
     {
+        $symfonySerializerDefinition = $container->findDefinition('serializer');
+        $symfonyNormalizers = $symfonySerializerDefinition->getArgument(0);
+        $symfonyEncoders = $symfonySerializerDefinition->getArgument(1);
+
         $resolver = $container->findDefinition('fivelab.resource.serializer_resolver');
         $services = $container->findTaggedServiceIds('resource.serializer');
 
@@ -40,19 +44,33 @@ class AddResourceSerializerPass implements CompilerPassInterface
                 $attributes = $tags[0];
 
                 if (!\array_key_exists('supportable', $attributes)) {
-                    throw new \RuntimeException('The resource serializer should define with supportable instance. Please add the "supportable" attribute to "resource.assembler".');
+                    throw new \RuntimeException('The resource serializer should define with supportable instance. Please add the "supportable" attribute to "resource.serializer".');
                 }
 
-                $serializerDefinition = $container->getDefinition($serviceId);
-                $serializerClass = $container->getParameterBag()->resolveValue($serializerDefinition->getClass());
+                $resourceSerializerDefinition = $container->getDefinition($serviceId);
+                $resourceSerializerClass = $container->getParameterBag()->resolveValue($resourceSerializerDefinition->getClass());
 
-                if (!\is_a($serializerClass, ResourceSerializerInterface::class, true)) {
+                if (!\is_a($resourceSerializerClass, ResourceSerializerInterface::class, true)) {
                     throw new \RuntimeException(\sprintf(
                         'The resource serializer should implement "%s".',
                         ResourceSerializerInterface::class
                     ));
                 }
 
+                // Configure serializer
+                /** @var Reference $serializerReference */
+                $serializerReference = $resourceSerializerDefinition->getArgument(0);
+                $serializerDefinition = $container->getDefinition((string) $serializerReference);
+
+                $serializerNormalizers = $serializerDefinition->getArgument(0);
+                $serializerNormalizers = \array_merge($serializerNormalizers, $symfonyNormalizers);
+
+                $serializerDefinition
+                    ->replaceArgument(0, $serializerNormalizers)
+                    ->replaceArgument(1, $symfonyEncoders)
+                    ->addMethodCall('setEventDispatcher', [new Reference('event_dispatcher')]);
+
+                // Configure resolver
                 $supportableServiceId = $attributes['supportable'];
 
                 $resolver->addMethodCall('add', [

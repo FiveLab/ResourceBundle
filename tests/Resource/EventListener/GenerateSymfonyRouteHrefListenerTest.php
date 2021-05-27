@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -23,6 +25,7 @@ use FiveLab\Component\Resource\Resource\Relation\Relation;
 use FiveLab\Component\Resource\Resource\Relation\RelationCollection;
 use FiveLab\Component\Resource\Resource\ResourceInterface;
 use FiveLab\Component\Resource\Serializer\Events\BeforeNormalizationEvent;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -32,14 +35,14 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class GenerateSymfonyRouteHrefListenerTest extends TestCase
 {
     /**
-     * @var UrlGeneratorInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var UrlGeneratorInterface|MockObject
      */
-    private $urlGenerator;
+    private UrlGeneratorInterface $urlGenerator;
 
     /**
      * @var GenerateSymfonyRouteHrefListener
      */
-    private $listener;
+    private GenerateSymfonyRouteHrefListener $listener;
 
     /**
      * {@inheritdoc}

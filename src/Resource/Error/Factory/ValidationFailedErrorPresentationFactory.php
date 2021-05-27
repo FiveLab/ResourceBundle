@@ -13,8 +13,8 @@ declare(strict_types = 1);
 
 namespace FiveLab\Bundle\ResourceBundle\Resource\Error\Factory;
 
+use FiveLab\Bundle\ResourceBundle\Exception\ResourceNotValidException;
 use FiveLab\Bundle\ResourceBundle\Resource\Error\ErrorPresentationFactoryInterface;
-use FiveLab\Component\Exception\ViolationListException;
 use FiveLab\Component\Resource\Presentation\PresentationFactory;
 use FiveLab\Component\Resource\Presentation\PresentationInterface;
 use FiveLab\Component\Resource\Resource\Error\ErrorCollection;
@@ -31,18 +31,18 @@ class ValidationFailedErrorPresentationFactory implements ErrorPresentationFacto
     /**
      * @var string
      */
-    private $message;
+    private string $message;
 
     /**
-     * @var string|int
+     * @var string|int|null
      */
     private $reason;
 
     /**
      * Constructor.
      *
-     * @param string     $message
-     * @param string|int $reason
+     * @param string          $message
+     * @param string|int|null $reason
      */
     public function __construct(string $message = 'Validation failed.', $reason = null)
     {
@@ -53,27 +53,27 @@ class ValidationFailedErrorPresentationFactory implements ErrorPresentationFacto
     /**
      * {@inheritdoc}
      */
-    public function create(\Exception $exception): ?PresentationInterface
+    public function create(\Throwable $error): ?PresentationInterface
     {
-        if (!$exception instanceof ViolationListException) {
+        if (!$error instanceof ResourceNotValidException) {
             return null;
         }
 
-        $violations = $exception->getViolationList();
+        $violations = $error->getViolations();
         $errors = [];
 
         /** @var ConstraintViolationInterface $violation */
         foreach ($violations as $violation) {
             $errors[] = new ErrorResource(
-                $violation->getMessage(),
+                (string) $violation->getMessage(),
                 $violation->getCode(),
                 $violation->getPropertyPath()
             );
         }
 
-        $error = new ErrorCollection($this->message, $this->reason);
-        $error->addErrors(...$errors);
+        $errorResource = new ErrorCollection($this->message, $this->reason);
+        $errorResource->addErrors(...$errors);
 
-        return PresentationFactory::badRequest($error);
+        return PresentationFactory::badRequest($errorResource);
     }
 }

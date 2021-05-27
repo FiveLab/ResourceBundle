@@ -25,9 +25,9 @@ interface ErrorPresentationFactoryInterface
     /**
      * Create the error presentation by exception.
      *
-     * @param \Exception $exception
+     * @param \Throwable $error
      *
      * @return PresentationInterface
      */
-    public function create(\Exception $exception): ?PresentationInterface;
+    public function create(\Throwable $error): ?PresentationInterface;
 }

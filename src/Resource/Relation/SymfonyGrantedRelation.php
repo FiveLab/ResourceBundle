@@ -26,26 +26,26 @@ class SymfonyGrantedRelation implements RelationInterface
     /**
      * @var string
      */
-    private $attribute;
+    private string $attribute;
 
     /**
-     * @var object
+     * @var object|null
      */
-    private $object;
+    private ?object $object;
 
     /**
      * @var RelationInterface
      */
-    private $originRelation;
+    private RelationInterface $originRelation;
 
     /**
      * Constructor.
      *
      * @param RelationInterface $originRelation
      * @param string            $attribute
-     * @param mixed             $object
+     * @param object|null       $object
      */
-    public function __construct(RelationInterface $originRelation, string $attribute, $object = null)
+    public function __construct(RelationInterface $originRelation, string $attribute, object $object = null)
     {
         $this->originRelation = $originRelation;
         $this->attribute = $attribute;
@@ -75,9 +75,9 @@ class SymfonyGrantedRelation implements RelationInterface
     /**
      * Get the object for check grants
      *
-     * @return mixed
+     * @return object|null
      */
-    public function getObject()
+    public function getObject(): ?object
     {
         return $this->object;
     }

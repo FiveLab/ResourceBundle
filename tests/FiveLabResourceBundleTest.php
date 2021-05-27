@@ -40,11 +40,6 @@ class FiveLabResourceBundleTest extends TestCase
         $expectedContainer->addCompilerPass(new AddResourceSerializerPass());
         $expectedContainer->addCompilerPass(new AddSerializationContextCollectorPass());
         $expectedContainer->addCompilerPass(new AddErrorPresentationFactoryPass());
-        $expectedContainer->addCompilerPass(new SerializerPass(
-            'fivelab.resource.serializer',
-            'resource.serializer.normalizer',
-            'resource.serializer.encoder'
-        ));
 
         self::assertEquals($expectedContainer, $container);
     }

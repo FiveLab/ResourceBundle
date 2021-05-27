@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -25,7 +27,7 @@ class SymfonyRouteHrefTest extends TestCase
      */
     public function shouldSuccessCreate(): void
     {
-        $href = new \FiveLab\Bundle\ResourceBundle\Resource\Href\SymfonyRouteHref('route_name', ['attr'], true, UrlGeneratorInterface::NETWORK_PATH);
+        $href = new SymfonyRouteHref('route_name', ['attr'], true, UrlGeneratorInterface::NETWORK_PATH);
 
         self::assertEquals('route_name', $href->getRouteName());
         self::assertEquals(['attr'], $href->getRouteParameters());

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -18,6 +20,7 @@ use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContext
 use FiveLab\Component\Resource\Serializer\Context\ResourceSerializationContext;
 use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerResolverInterface;
 use FiveLab\Component\Resource\Serializer\ResourceSerializerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,19 +31,19 @@ use Symfony\Component\HttpFoundation\Request;
 class ResourceParamConverterTest extends TestCase
 {
     /**
-     * @var ResourceSerializerResolverInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ResourceSerializerResolverInterface|MockObject
      */
-    private $serializerResolver;
+    private ResourceSerializerResolverInterface $serializerResolver;
 
     /**
-     * @var SerializationContextCollectorInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var SerializationContextCollectorInterface|MockObject
      */
-    private $serializationContextCollector;
+    private SerializationContextCollectorInterface $serializationContextCollector;
 
     /**
      * @var ResourceParamConverter
      */
-    private $converter;
+    private ResourceParamConverter $converter;
 
     /**
      * {@inheritdoc}

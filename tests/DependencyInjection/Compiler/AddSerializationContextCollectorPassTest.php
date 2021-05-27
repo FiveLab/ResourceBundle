@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -12,43 +14,31 @@
 namespace FiveLab\Bundle\ResourceBundle\Tests\DependencyInjection\Compiler;
 
 use FiveLab\Bundle\ResourceBundle\DependencyInjection\Compiler\AddSerializationContextCollectorPass;
-use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContextCollectorChain;
+use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContextCollector;
 use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContextCollectorInterface;
-use PHPUnit\Framework\TestCase;
+use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
-/**
- * @author Vitaliy Zhuk <v.zhuk@fivelab.org>
- */
-class AddSerializationContextCollectorPassTest extends TestCase
+class AddSerializationContextCollectorPassTest extends AbstractCompilerPassTestCase
 {
-    /**
-     * @var ContainerBuilder
-     */
-    private $container;
-
-    /**
-     * @var Definition
-     */
-    private $collectorDefinition;
-
-    /**
-     * @var AddSerializationContextCollectorPass
-     */
-    private $compiler;
-
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        $this->container = new ContainerBuilder();
-        $this->collectorDefinition = new Definition(SerializationContextCollectorChain::class);
-        $this->container->setDefinition('fivelab.resource.serializer.context_collector', $this->collectorDefinition);
+        parent::setUp();
 
-        $this->compiler = new AddSerializationContextCollectorPass();
+        $this->container->setDefinition('fivelab.resource.serializer.context_collector', new Definition(SerializationContextCollector::class));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerCompilerPass(ContainerBuilder $container): void
+    {
+        $container->addCompilerPass(new AddSerializationContextCollectorPass());
     }
 
     /**
@@ -56,44 +46,31 @@ class AddSerializationContextCollectorPassTest extends TestCase
      */
     public function shouldSuccessCompile(): void
     {
-        $collector = $this->createMock(SerializationContextCollectorInterface::class);
-        $collectorClass = get_class($collector);
+        $collectorDef = new Definition(SerializationContextCollectorInterface::class);
+        $collectorDef->addTag('resource.serializer.collector');
 
-        $this->container->getParameterBag()->add([
-            'collector.class' => $collectorClass,
+        $this->container->setDefinition('collector.test', $collectorDef);
+
+        $this->compile();
+
+        $this->assertContainerBuilderHasServiceDefinitionWithMethodCall('fivelab.resource.serializer.context_collector', 'add', [
+            new Reference('collector.test'),
         ]);
-
-        $collectorDefinition = (new Definition('%collector.class%'))
-            ->addTag('resource.serializer.collector');
-
-        $this->container->setDefinition('collector.custom', $collectorDefinition);
-
-        $this->compiler->process($this->container);
-        $calls = $this->collectorDefinition->getMethodCalls();
-
-        self::assertEquals([
-            [
-                'add',
-                [
-                    new Reference('collector.custom'),
-                ],
-            ],
-        ], $calls);
     }
 
     /**
      * @test
      */
-    public function shouldFailIfCollectorNotImplementInterface(): void
+    public function shouldThrowErrorIfNotImplementInterface(): void
     {
+        $collectorTest = new Definition(\stdClass::class);
+        $collectorTest->addTag('resource.serializer.collector');
+
+        $this->container->setDefinition('collector.test', $collectorTest);
+
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Can\'t compile resource serialization collector with service id "collector.custom".');
+        $this->expectExceptionMessage('Can\'t compile resource serialization collector with service id "collector.test".');
 
-        $collectorDefinition = (new Definition(\stdClass::class))
-            ->addTag('resource.serializer.collector');
-
-        $this->container->setDefinition('collector.custom', $collectorDefinition);
-
-        $this->compiler->process($this->container);
+        $this->compile();
     }
 }

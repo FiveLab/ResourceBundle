@@ -20,12 +20,12 @@ use FiveLab\Component\Resource\Presentation\PresentationInterface;
  *
  * @author Vitaliy Zhuk <v.zhuk@fivelab.org>
  */
-class ErrorPresentationFactoryChain implements ErrorPresentationFactoryInterface
+class ErrorPresentationFactory implements ErrorPresentationFactoryInterface
 {
     /**
-     * @var \SplQueue|ErrorPresentationFactoryInterface[]
+     * @var \SplQueue<ErrorPresentationFactoryInterface>
      */
-    private $factories;
+    private \SplQueue $factories;
 
     /**
      * Constructor.
@@ -48,10 +48,10 @@ class ErrorPresentationFactoryChain implements ErrorPresentationFactoryInterface
     /**
      * {@inheritdoc}
      */
-    public function create(\Exception $exception): ?PresentationInterface
+    public function create(\Throwable $error): ?PresentationInterface
     {
         foreach ($this->factories as $factory) {
-            $errorPresentation = $factory->create($exception);
+            $errorPresentation = $factory->create($error);
 
             if ($errorPresentation) {
                 return $errorPresentation;

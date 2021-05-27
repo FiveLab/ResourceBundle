@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -14,41 +16,29 @@ namespace FiveLab\Bundle\ResourceBundle\Tests\DependencyInjection\Compiler;
 use FiveLab\Bundle\ResourceBundle\DependencyInjection\Compiler\AddResourceAssemblerPass;
 use FiveLab\Component\Resource\Assembler\Resolver\ResourceAssemblerResolver;
 use FiveLab\Component\Resource\Assembler\ResourceAssemblerInterface;
-use PHPUnit\Framework\TestCase;
+use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
-/**
- * @author Vitaliy Zhuk <v.zhuk@fivelab.org>
- */
-class AddResourceAssemblerPassTest extends TestCase
+class AddResourceAssemblerPassTest extends AbstractCompilerPassTestCase
 {
-    /**
-     * @var ContainerBuilder
-     */
-    private $container;
-
-    /**
-     * @var Definition
-     */
-    private $resolverDefinition;
-
-    /**
-     * @var AddResourceAssemblerPass
-     */
-    private $compiler;
-
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        $this->container = new ContainerBuilder();
-        $this->resolverDefinition = new Definition(ResourceAssemblerResolver::class);
-        $this->container->setDefinition('fivelab.resource.assembler_resolver', $this->resolverDefinition);
+        parent::setUp();
 
-        $this->compiler = new AddResourceAssemblerPass();
+        $this->container->setDefinition('fivelab.resource.assembler_resolver', new Definition(ResourceAssemblerResolver::class));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerCompilerPass(ContainerBuilder $container): void
+    {
+        $container->addCompilerPass(new AddResourceAssemblerPass());
     }
 
     /**
@@ -56,68 +46,48 @@ class AddResourceAssemblerPassTest extends TestCase
      */
     public function shouldSuccessCompile(): void
     {
-        $assembler = $this->createMock(ResourceAssemblerInterface::class);
-        $assemblerClass = get_class($assembler);
+        $factoryDef = new Definition(ResourceAssemblerInterface::class);
+        $factoryDef->addTag('resource.assembler', ['supportable' => 'assembler.supportable']);
 
-        $this->container->getParameterBag()->add([
-            'assembler.class' => $assemblerClass,
+        $this->container->setDefinition('assembler.test', $factoryDef);
+
+        $this->compile();
+
+        $this->assertContainerBuilderHasServiceDefinitionWithMethodCall('fivelab.resource.assembler_resolver', 'add', [
+            new Reference('assembler.supportable'),
+            new Reference('assembler.test'),
         ]);
-
-        $factoryDefinition = (new Definition('%assembler.class%'))
-            ->addTag('resource.assembler', ['supportable' => 'resource.assembler.supportable']);
-
-        $this->container->setDefinition('assembler.custom', $factoryDefinition);
-
-        $this->compiler->process($this->container);
-        $calls = $this->resolverDefinition->getMethodCalls();
-
-        self::assertEquals([
-            [
-                'add',
-                [
-                    new Reference('resource.assembler.supportable'),
-                    new Reference('assembler.custom'),
-                ],
-            ],
-        ], $calls);
     }
 
     /**
      * @test
      */
-    public function shouldFailIfSupportableNotProvided(): void
+    public function shouldThrowErrorIfNotImplementInterface(): void
     {
+        $assemblerDef = new Definition(\stdClass::class);
+        $assemblerDef->addTag('resource.assembler', ['supportable' => 'assembler.supportable']);
+
+        $this->container->setDefinition('assembler.test', $assemblerDef);
+
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Can\'t compile resource assembler with service id "assembler.custom".');
+        $this->expectExceptionMessage('Can\'t compile resource assembler with service id "assembler.test".');
 
-        $assembler = $this->createMock(ResourceAssemblerInterface::class);
-        $assemblerClass = get_class($assembler);
-
-        $this->container->getParameterBag()->add([
-            'assembler.class' => $assemblerClass,
-        ]);
-
-        $factoryDefinition = (new Definition('%assembler.class%'))
-            ->addTag('resource.assembler');
-
-        $this->container->setDefinition('assembler.custom', $factoryDefinition);
-
-        $this->compiler->process($this->container);
+        $this->compile();
     }
 
     /**
      * @test
      */
-    public function shouldFailIfAssemblerNotSupportRequiredInterface(): void
+    public function shouldThrowErrorIfNotExistSupportable(): void
     {
+        $assemblerDef = new Definition(ResourceAssemblerInterface::class);
+        $assemblerDef->addTag('resource.assembler');
+
+        $this->container->setDefinition('assembler.test', $assemblerDef);
+
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Can\'t compile resource assembler with service id "assembler.custom".');
+        $this->expectExceptionMessage('Can\'t compile resource assembler with service id "assembler.test".');
 
-        $factoryDefinition = (new Definition(\stdClass::class))
-            ->addTag('resource.assembler', ['supportable' => 'resource.assembler.supportable']);
-
-        $this->container->setDefinition('assembler.custom', $factoryDefinition);
-
-        $this->compiler->process($this->container);
+        $this->compile();
     }
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="fivelab.resource.serializer.web_api_json.normalizer.paginated_collection.class">FiveLab\Component\Resource\Serializers\WebApi\Normalizer\PaginatedCollectionNormalizer</parameter>
+
+        <parameter key="fivelab.resource.serializer.web_api_json.class">FiveLab\Component\Resource\Serializers\WebApi\WebApiSerializer</parameter>
+        <parameter key="fivelab.resource.serializer.web_api_json.supportable.class">FiveLab\Component\Resource\Serializer\Resolver\AcceptFormatSupportable</parameter>
+    </parameters>
+
+    <services>
+        <!-- Web Api Serializer -->
+        <service id="fivelab.resource.serializer.web_api_json.normalizer.paginated_collection" class="%fivelab.resource.serializer.web_api_json.normalizer.paginated_collection.class%"/>
+
+        <service id="fivelab.serializer.web_api" class="%fivelab.serializer.class%">
+            <argument type="collection">
+                <argument type="service" id="fivelab.resource.serializer.web_api_json.normalizer.paginated_collection"/>
+            </argument> <!-- Normalizers -->
+            <argument type="collection"/> <!-- Encoders -->
+        </service>
+
+        <service id="fivelab.resource.serializer.web_api_json" class="%fivelab.resource.serializer.web_api_json.class%">
+            <argument type="service" id="fivelab.serializer.web_api"/>
+            <argument>json</argument>
+            <argument type="collection"/>
+            <tag name="resource.serializer" supportable="fivelab.resource.serializer.web_api_json.supportable"/>
+        </service>
+
+        <service id="fivelab.resource.serializer.web_api_json.supportable" class="%fivelab.resource.serializer.web_api_json.supportable.class%">
+            <argument type="collection">
+                <argument>application/json</argument>
+            </argument>
+        </service>
+    </services>
+</container>

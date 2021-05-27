@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -11,7 +13,7 @@
 
 namespace FiveLab\Bundle\ResourceBundle\Tests\Resource\Error;
 
-use FiveLab\Bundle\ResourceBundle\Resource\Error\ErrorPresentationFactoryChain;
+use FiveLab\Bundle\ResourceBundle\Resource\Error\ErrorPresentationFactory;
 use FiveLab\Bundle\ResourceBundle\Resource\Error\ErrorPresentationFactoryInterface;
 use FiveLab\Component\Resource\Presentation\PresentationInterface;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +21,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @author Vitaliy Zhuk <v.zhuk@fivelab.org>
  */
-class ErrorPresentationFactoryChainTest extends TestCase
+class ErrorPresentationFactoryTest extends TestCase
 {
     /**
      * @test
@@ -29,7 +31,7 @@ class ErrorPresentationFactoryChainTest extends TestCase
         $factory1 = $this->createMock(ErrorPresentationFactoryInterface::class);
         $factory2 = $this->createMock(ErrorPresentationFactoryInterface::class);
 
-        $chain = new ErrorPresentationFactoryChain();
+        $chain = new ErrorPresentationFactory();
         $chain->add($factory1);
         $chain->add($factory2);
 
@@ -56,7 +58,7 @@ class ErrorPresentationFactoryChainTest extends TestCase
      */
     public function shouldReturnNullIfNotCreated(): void
     {
-        $chain = new ErrorPresentationFactoryChain();
+        $chain = new ErrorPresentationFactory();
         $result = $chain->create(new \Exception());
 
         self::assertNull($result);

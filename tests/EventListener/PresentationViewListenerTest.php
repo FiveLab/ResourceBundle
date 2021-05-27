@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -18,9 +20,10 @@ use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContext
 use FiveLab\Component\Resource\Serializer\Context\ResourceSerializationContext;
 use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerResolverInterface;
 use FiveLab\Component\Resource\Serializer\ResourceSerializerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
@@ -29,19 +32,19 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 class PresentationViewListenerTest extends TestCase
 {
     /**
-     * @var ResourceSerializerResolverInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ResourceSerializerResolverInterface|MockObject
      */
-    private $serializerResolver;
+    private ResourceSerializerResolverInterface $serializerResolver;
 
     /**
-     * @var SerializationContextCollectorInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var SerializationContextCollectorInterface|MockObject
      */
-    private $serializationContextCollector;
+    private SerializationContextCollectorInterface $serializationContextCollector;
 
     /**
      * @var PresentationViewListener
      */
-    private $listener;
+    private PresentationViewListener $listener;
 
     /**
      * {@inheritdoc}
@@ -129,9 +132,9 @@ class PresentationViewListenerTest extends TestCase
      * @param array  $acceptableMediaTypes
      * @param object $controllerResult
      *
-     * @return GetResponseForControllerResultEvent
+     * @return ViewEvent
      */
-    private function createEvent(array $acceptableMediaTypes, $controllerResult): GetResponseForControllerResultEvent
+    private function createEvent(array $acceptableMediaTypes, $controllerResult): ViewEvent
     {
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = new Request(
@@ -145,6 +148,6 @@ class PresentationViewListenerTest extends TestCase
             ]
         );
 
-        return new GetResponseForControllerResultEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $controllerResult);
+        return new ViewEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $controllerResult);
     }
 }

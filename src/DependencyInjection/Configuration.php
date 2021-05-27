@@ -14,6 +14,7 @@ declare(strict_types = 1);
 namespace FiveLab\Bundle\ResourceBundle\DependencyInjection;
 
 use Psr\Log\LogLevel;
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -29,137 +30,193 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('fivelab_resource');
+        $treeBuilder = new TreeBuilder('fivelab_resource');
+        $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
             ->children()
-                ->arrayNode('serializer')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->scalarNode('metadata_factory')
-                            ->info('The service id of class metadata factory.')
-                            ->defaultValue('serializer.mapping.class_metadata_factory')
-                        ->end()
+                ->append($this->createLoggingNode())
+                ->append($this->createListenersNode())
+                ->append($this->createErrorPresentationNode())
+                ->append($this->createSerializersNode())
+            ->end();
 
-                        ->scalarNode('name_converter')
-                            ->info('The service id of name converter.')
-                            ->defaultNull()
-                        ->end()
+        return $treeBuilder;
+    }
 
-                        ->scalarNode('property_accessor')
-                            ->info('The service id of property accessor.')
-                            ->defaultValue('property_accessor')
-                        ->end()
+    /**
+     * Create serializers node
+     *
+     * @return ArrayNodeDefinition
+     */
+    private function createSerializersNode(): ArrayNodeDefinition
+    {
+        $node = new ArrayNodeDefinition('serializers');
 
-                        ->scalarNode('property_info')
-                            ->info('The service id of property info reader.')
-                            ->defaultValue('property_info')
-                        ->end()
+        $node
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->append($this->createSerializerNode('web_api', 'Enable simple WEB API serializer.', true))
+                ->append($this->createSerializerNode('vnd_error', 'Enable vnd.error serializer.'))
+                ->append($this->createSerializerNode('hateoas', 'Enable HATEOAS serializer.'))
+            ->end();
 
-                        ->scalarNode('event_dispatcher')
-                            ->info('The service id of event dispatcher.')
-                            ->defaultValue('event_dispatcher')
-                        ->end()
+        return $node;
+    }
 
-                        ->scalarNode('serialize_null')
-                            ->info('Serialize nullable attributes.')
-                            ->defaultValue(true)
-                        ->end()
-                    ->end()
+    /**
+     * Create serializer node
+     *
+     * @param string $name
+     * @param string $description
+     * @param bool   $enabled
+     *
+     * @return ArrayNodeDefinition
+     */
+    private function createSerializerNode(string $name, string $description, bool $enabled = false): ArrayNodeDefinition
+    {
+        $node = new ArrayNodeDefinition($name);
+
+        $node
+            ->addDefaultsIfNotSet()
+            ->info($description)
+            ->children()
+                ->booleanNode('enabled')
+                    ->info('Enable serializer?')
+                    ->defaultValue($enabled)
                 ->end()
 
-                ->arrayNode('logging')
+                ->arrayNode('options')
+                    ->info('The options for serialization.')
+                    ->defaultValue([])
+                    ->prototype('scalar')
+                    ->end()
+                ->end()
+            ->end();
+
+        return $node;
+    }
+
+    /**
+     * Create error presentation node
+     *
+     * @return ArrayNodeDefinition
+     */
+    private function createErrorPresentationNode(): ArrayNodeDefinition
+    {
+        $node = new ArrayNodeDefinition('error_presentation_factory');
+
+        $node
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->arrayNode('validation')
                     ->addDefaultsIfNotSet()
                     ->children()
                         ->booleanNode('enabled')
-                            ->info('If logging enabled?')
-                            ->defaultValue(true)
+                            ->info('Enable validation error presentation factory.')
+                            ->defaultTrue()
                         ->end()
 
-                        ->scalarNode('channel')
-                            ->info('The channel for Monolog.')
-                            ->defaultValue('api')
+                        ->scalarNode('message')
+                            ->info('The message for create error.')
+                            ->defaultValue('Validation failed.')
                         ->end()
 
-                        ->scalarNode('level')
-                            ->info('The level for logging.')
-                            ->defaultValue(LogLevel::ERROR)
-                        ->end()
-                    ->end()
-                ->end()
-
-                ->arrayNode('listeners')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->arrayNode('exception')
-                            ->addDefaultsIfNotSet()
-                            ->children()
-                                ->booleanNode('debug_parameter')
-                                    ->info('The name of debug parameter (Work only in kernel.debug mode).')
-                                    ->defaultValue('_debug')
-                                ->end()
-                            ->end()
-                        ->end()
-
-                        ->arrayNode('validation')
-                            ->addDefaultsIfNotSet()
-                            ->children()
-                                ->booleanNode('enabled')
-                                    ->info('Enable validation listener. The Symfony/Validator package must be installed.')
-                                    ->defaultTrue()
-                                ->end()
-                            ->end()
-                        ->end()
-
-                        ->arrayNode('symfony_security')
-                            ->addDefaultsIfNotSet()
-                            ->children()
-                                ->booleanNode('enabled')
-                                    ->info('Enable Symfony Grant Relation listener. The Symfony/Security package must be installed.')
-                                    ->defaultTrue()
-                                ->end()
-                            ->end()
-                        ->end()
-
-                        ->arrayNode('normalize_resource')
-                            ->addDefaultsIfNotSet()
-                            ->children()
-                                ->booleanNode('enabled')
-                                    ->info('Enable normalize normalizable resources listener.')
-                                    ->defaultTrue()
-                                ->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-
-                ->arrayNode('error_presentation_factory')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->arrayNode('validation')
-                            ->addDefaultsIfNotSet()
-                            ->children()
-                                ->booleanNode('enabled')
-                                    ->info('Enable validation error presentation factory.')
-                                    ->defaultTrue()
-                                ->end()
-
-                                ->scalarNode('message')
-                                    ->info('The message for create error.')
-                                    ->defaultValue('Validation failed.')
-                                ->end()
-
-                                ->scalarNode('reason')
-                                    ->info('The reason for create error.')
-                                    ->defaultValue('ValidationFailed')
-                                ->end()
-                            ->end()
+                        ->scalarNode('reason')
+                            ->info('The reason for create error.')
+                            ->defaultValue('ValidationFailed')
                         ->end()
                     ->end()
                 ->end()
             ->end();
 
-        return $treeBuilder;
+        return $node;
+    }
+
+    /**
+     * Create listeners node
+     *
+     * @return ArrayNodeDefinition
+     */
+    private function createListenersNode(): ArrayNodeDefinition
+    {
+        $node = new ArrayNodeDefinition('listeners');
+
+        $node
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->arrayNode('exception')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('debug_parameter')
+                            ->info('The name of debug parameter (Work only in kernel.debug mode).')
+                        ->defaultValue('_debug')
+                    ->end()
+                    ->end()
+                ->end()
+
+                ->arrayNode('validation')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('enabled')
+                            ->info('Enable validation listener. The Symfony/Validator package must be installed.')
+                            ->defaultTrue()
+                        ->end()
+                    ->end()
+                ->end()
+
+                ->arrayNode('symfony_security')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('enabled')
+                            ->info('Enable Symfony Grant Relation listener. The Symfony/Security package must be installed.')
+                            ->defaultTrue()
+                        ->end()
+                    ->end()
+                ->end()
+
+                ->arrayNode('normalize_resource')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('enabled')
+                            ->info('Enable normalize normalizable resources listener.')
+                            ->defaultTrue()
+                        ->end()
+                        ->end()
+                    ->end()
+                ->end();
+
+        return $node;
+    }
+
+    /**
+     * Create logging node
+     *
+     * @return ArrayNodeDefinition
+     */
+    private function createLoggingNode(): ArrayNodeDefinition
+    {
+        $node = new ArrayNodeDefinition('logging');
+
+        $node
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->booleanNode('enabled')
+                    ->info('If logging enabled?')
+                    ->defaultValue(true)
+                ->end()
+
+                ->scalarNode('channel')
+                    ->info('The channel for Monolog.')
+                    ->defaultValue('api')
+                ->end()
+
+                ->scalarNode('level')
+                    ->info('The level for logging.')
+                    ->defaultValue(LogLevel::ERROR)
+                ->end()
+            ->end();
+
+        return $node;
     }
 }

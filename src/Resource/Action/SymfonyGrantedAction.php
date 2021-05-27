@@ -27,26 +27,26 @@ class SymfonyGrantedAction implements ActionInterface
     /**
      * @var string
      */
-    private $attribute;
+    private string $attribute;
 
     /**
-     * @var object
+     * @var object|null
      */
-    private $object;
+    private ?object $object;
 
     /**
      * @var ActionInterface
      */
-    private $originAction;
+    private ActionInterface $originAction;
 
     /**
      * Constructor.
      *
      * @param ActionInterface $originAction
      * @param string          $attribute
-     * @param mixed           $object
+     * @param object|null     $object
      */
-    public function __construct(ActionInterface $originAction, string $attribute, $object = null)
+    public function __construct(ActionInterface $originAction, string $attribute, object $object = null)
     {
         $this->attribute = $attribute;
         $this->object = $object;
@@ -76,9 +76,9 @@ class SymfonyGrantedAction implements ActionInterface
     /**
      * Get the object
      *
-     * @return mixed
+     * @return object|null
      */
-    public function getObject()
+    public function getObject(): ?object
     {
         return $this->object;
     }

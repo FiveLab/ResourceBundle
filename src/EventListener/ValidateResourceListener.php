@@ -13,9 +13,9 @@ declare(strict_types = 1);
 
 namespace FiveLab\Bundle\ResourceBundle\EventListener;
 
-use FiveLab\Component\Exception\ViolationListException;
+use FiveLab\Bundle\ResourceBundle\Exception\ResourceNotValidException;
 use FiveLab\Component\Resource\Resource\ResourceInterface;
-use Symfony\Component\HttpKernel\Event\FilterControllerArgumentsEvent;
+use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -28,7 +28,7 @@ class ValidateResourceListener
     /**
      * @var ValidatorInterface
      */
-    private $validator;
+    private ValidatorInterface $validator;
 
     /**
      * Constructor.
@@ -43,11 +43,11 @@ class ValidateResourceListener
     /**
      * Listen kernel.controller_arguments event for validate input resources
      *
-     * @param FilterControllerArgumentsEvent $event
+     * @param ControllerArgumentsEvent $event
      *
-     * @throws ViolationListException
+     * @throws ResourceNotValidException
      */
-    public function onKernelControllerArguments(FilterControllerArgumentsEvent $event): void
+    public function onKernelControllerArguments(ControllerArgumentsEvent $event): void
     {
         $arguments = $event->getArguments();
 
@@ -56,7 +56,7 @@ class ValidateResourceListener
                 $violationList = $this->validator->validate($argument);
 
                 if (\count($violationList)) {
-                    throw ViolationListException::create($violationList);
+                    throw new ResourceNotValidException($violationList);
                 }
             }
         }

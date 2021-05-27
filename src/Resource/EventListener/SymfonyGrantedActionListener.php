@@ -28,7 +28,7 @@ class SymfonyGrantedActionListener
     /**
      * @var AuthorizationCheckerInterface
      */
-    private $authorizationChecker;
+    private AuthorizationCheckerInterface $authorizationChecker;
 
     /**
      * Constructor.

@@ -32,12 +32,12 @@ class ResourceParamConverter implements ParamConverterInterface
     /**
      * @var ResourceSerializerResolverInterface
      */
-    private $serializerResolver;
+    private ResourceSerializerResolverInterface $serializerResolver;
 
     /**
      * @var SerializationContextCollectorInterface
      */
-    private $serializationContextCollector;
+    private SerializationContextCollectorInterface $serializationContextCollector;
 
     /**
      * Constructor.
@@ -57,26 +57,28 @@ class ResourceParamConverter implements ParamConverterInterface
      * @throws MissingContentInRequestException
      * @throws ResourceSerializerNotFoundException
      */
-    public function apply(Request $request, ParamConverter $configuration): void
+    public function apply(Request $request, ParamConverter $configuration): bool
     {
-        $content = $request->getContent();
+        $content = (string) $request->getContent();
 
         if (!$content) {
             if ($configuration->isOptional()) {
                 $request->attributes->set($configuration->getName(), null);
 
-                return;
+                return true;
             }
 
             throw new MissingContentInRequestException();
         }
 
-        $serializer = $this->serializerResolver->resolveByMediaType($configuration->getClass(), $request->headers->get('Content-Type'));
+        $serializer = $this->serializerResolver->resolveByMediaType($configuration->getClass(), (string) $request->headers->get('Content-Type'));
         $context = $this->serializationContextCollector->collect();
 
         $resource = $serializer->deserialize($content, $configuration->getClass(), $context);
 
         $request->attributes->set($configuration->getName(), $resource);
+
+        return true;
     }
 
     /**

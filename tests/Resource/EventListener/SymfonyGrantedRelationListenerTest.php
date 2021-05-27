@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -18,6 +20,7 @@ use FiveLab\Component\Resource\Resource\Relation\RelationCollection;
 use FiveLab\Component\Resource\Resource\Relation\RelationInterface;
 use FiveLab\Component\Resource\Resource\ResourceInterface;
 use FiveLab\Component\Resource\Serializer\Events\BeforeNormalizationEvent;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
@@ -27,14 +30,14 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 class SymfonyGrantedRelationListenerTest extends TestCase
 {
     /**
-     * @var AuthorizationCheckerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var AuthorizationCheckerInterface|MockObject
      */
-    private $authorizationChecker;
+    private AuthorizationCheckerInterface $authorizationChecker;
 
     /**
      * @var SymfonyGrantedRelationListener
      */
-    private $listener;
+    private SymfonyGrantedRelationListener $listener;
 
     /**
      * {@inheritdoc}

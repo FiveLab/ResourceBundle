@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /*
  * This file is part of the FiveLab ResourceBundle package
  *
@@ -14,41 +16,39 @@ namespace FiveLab\Bundle\ResourceBundle\Tests\DependencyInjection\Compiler;
 use FiveLab\Bundle\ResourceBundle\DependencyInjection\Compiler\AddResourceSerializerPass;
 use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerResolver;
 use FiveLab\Component\Resource\Serializer\ResourceSerializerInterface;
-use PHPUnit\Framework\TestCase;
+use FiveLab\Component\Resource\Serializer\Serializer;
+use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Serializer\Serializer as SymfonySerializer;
 
-/**
- * @author Vitaliy Zhuk <v.zhuk@fivelab.org>
- */
-class AddResourceSerializerPassTest extends TestCase
+class AddResourceSerializerPassTest extends AbstractCompilerPassTestCase
 {
-    /**
-     * @var ContainerBuilder
-     */
-    private $container;
-
-    /**
-     * @var Definition
-     */
-    private $resolverDefinition;
-
-    /**
-     * @var AddResourceSerializerPass
-     */
-    private $compiler;
-
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        $this->container = new ContainerBuilder();
-        $this->resolverDefinition = new Definition(ResourceSerializerResolver::class);
-        $this->container->setDefinition('fivelab.resource.serializer_resolver', $this->resolverDefinition);
+        parent::setUp();
 
-        $this->compiler = new AddResourceSerializerPass();
+        $symfonySerializerDef = new Definition(SymfonySerializer::class);
+        $symfonySerializerDef->setArguments([
+            [new Reference('sf_normalizer_1'), new Reference('sf_normalizer_2')],
+            [new Reference('sf_encoder_1'), new Reference('sf_encoder_2')],
+        ]);
+
+        $this->container->setDefinition('serializer', $symfonySerializerDef);
+
+        $this->container->setDefinition('fivelab.resource.serializer_resolver', new Definition(ResourceSerializerResolver::class));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerCompilerPass(ContainerBuilder $container): void
+    {
+        $container->addCompilerPass(new AddResourceSerializerPass());
     }
 
     /**
@@ -56,68 +56,65 @@ class AddResourceSerializerPassTest extends TestCase
      */
     public function shouldSuccessCompile(): void
     {
-        $serializer = $this->createMock(ResourceSerializerInterface::class);
-        $serializerClass = get_class($serializer);
-
-        $this->container->getParameterBag()->add([
-            'serializer.class' => $serializerClass,
+        $serializerDef = new Definition(Serializer::class);
+        $serializerDef->setArguments([
+            [new Reference('normalizer_1'), new Reference('normalizer_2')],
+            [],
         ]);
 
-        $factoryDefinition = (new Definition('%serializer.class%'))
-            ->addTag('resource.serializer', ['supportable' => 'resource.serializer.supportable']);
+        $this->container->setDefinition('resource.serializer.inner', $serializerDef);
 
-        $this->container->setDefinition('serializer.custom', $factoryDefinition);
+        $resourceSerializerDef = new Definition(ResourceSerializerInterface::class);
+        $resourceSerializerDef->setArguments([new Reference('resource.serializer.inner')]);
+        $resourceSerializerDef->addTag('resource.serializer', ['supportable' => 'foo.bar']);
 
-        $this->compiler->process($this->container);
-        $calls = $this->resolverDefinition->getMethodCalls();
+        $this->container->setDefinition('resource.serializer', $resourceSerializerDef);
 
-        self::assertEquals([
-            [
-                'add',
-                [
-                    new Reference('resource.serializer.supportable'),
-                    new Reference('serializer.custom'),
-                ],
-            ],
-        ], $calls);
+        $this->compile();
+
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument('resource.serializer.inner', 0, [
+            new Reference('normalizer_1'),
+            new Reference('normalizer_2'),
+            new Reference('sf_normalizer_1'),
+            new Reference('sf_normalizer_2'),
+        ]);
+
+        $this->assertContainerBuilderHasServiceDefinitionWithMethodCall('fivelab.resource.serializer_resolver', 'add', [
+            new Reference('foo.bar'),
+            new Reference('resource.serializer'),
+        ]);
     }
 
     /**
      * @test
      */
-    public function shouldFailIfSupportableNotProvided(): void
+    public function shouldThrowErrorIfNotImplementInterface(): void
     {
+        $resourceSerializerDef = new Definition(\stdClass::class);
+        $resourceSerializerDef->addTag('resource.serializer');
+
+        $this->container->setDefinition('resource.serializer', $resourceSerializerDef);
+
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Can\'t compile resource serializer with service id "serializer.custom".');
+        $this->expectExceptionMessage('Can\'t compile resource serializer with service id "resource.serializer".');
 
-        $serializer = $this->createMock(ResourceSerializerInterface::class);
-        $serializerClass = get_class($serializer);
-
-        $this->container->getParameterBag()->add([
-            'serializer.class' => $serializerClass,
-        ]);
-
-        $factoryDefinition = (new Definition('%serializer.class%'))
-            ->addTag('resource.serializer');
-
-        $this->container->setDefinition('serializer.custom', $factoryDefinition);
-
-        $this->compiler->process($this->container);
+        $this->compile();
     }
 
     /**
      * @test
      */
-    public function shouldFailIfSerializerNotSupportRequiredInterface(): void
+    public function shouldThrowErrorIfNotExistSupportable(): void
     {
+        $resourceSerializerDef = new Definition(ResourceSerializerInterface::class);
+        $resourceSerializerDef->setArguments([new Reference('serializer')]);
+        $resourceSerializerDef->addTag('resource.serializer');
+
+        $this->container->setDefinition('resource.serializer', $resourceSerializerDef);
+
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Can\'t compile resource serializer with service id "serializer.custom".');
+        $this->expectExceptionMessage('Can\'t compile resource serializer with service id "resource.serializer".');
 
-        $factoryDefinition = (new Definition(\stdClass::class))
-            ->addTag('resource.serializer', ['supportable' => 'resource.serializer.supportable']);
-
-        $this->container->setDefinition('serializer.custom', $factoryDefinition);
-
-        $this->compiler->process($this->container);
+        $this->compile();
     }
 }

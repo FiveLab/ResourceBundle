@@ -18,7 +18,7 @@ use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContext
 use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerNotFoundException;
 use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerResolverInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
 
 /**
  * The listener for listen kernel view event and serialize resource object for next send to client.
@@ -30,12 +30,12 @@ class PresentationViewListener
     /**
      * @var ResourceSerializerResolverInterface
      */
-    private $serializerResolver;
+    private ResourceSerializerResolverInterface $serializerResolver;
 
     /**
      * @var SerializationContextCollectorInterface
      */
-    private $serializationContextCollector;
+    private SerializationContextCollectorInterface $serializationContextCollector;
 
     /**
      * Constructor.
@@ -52,12 +52,11 @@ class PresentationViewListener
     /**
      * Handle for transform presentation to content for send to client
      *
-     * @param GetResponseForControllerResultEvent $event
+     * @param ViewEvent $event
      *
-     * @throws \InvalidArgumentException
      * @throws ResourceSerializerNotFoundException
      */
-    public function onKernelView(GetResponseForControllerResultEvent $event): void
+    public function onKernelView(ViewEvent $event): void
     {
         $presentation = $event->getControllerResult();
 
@@ -70,17 +69,20 @@ class PresentationViewListener
         $headers = [];
 
         if ($presentation->getResource()) {
-            $acceptableMediaTypes = $event->getRequest()->getAcceptableContentTypes();
+            $acceptedMediaType = null;
+
             $serializer = $this->serializerResolver->resolveByMediaTypes(
-                \get_class($presentation->getResource()),
-                $acceptableMediaTypes,
-                $acceptableMediaType
+                \get_class($presentation->getResource()), /** @phpstan-ignore-line */
+                $event->getRequest()->getAcceptableContentTypes(),
+                $acceptedMediaType
             );
 
             $serializationContext = $this->serializationContextCollector->collect();
+            /* @phpstan-ignore-next-line */
             $data = $serializer->serialize($presentation->getResource(), $serializationContext);
+
             $headers = [
-                'Content-Type' => $acceptableMediaType,
+                'Content-Type' => $acceptedMediaType,
             ];
         }
 

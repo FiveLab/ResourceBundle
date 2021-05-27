@@ -23,6 +23,9 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Serializer\Serializer as SymfonySerializer;
 
+/**
+ * @author Vitaliy Zhuk <v.zhuk@fivelab.org>
+ */
 class AddResourceSerializerPassTest extends AbstractCompilerPassTestCase
 {
     /**

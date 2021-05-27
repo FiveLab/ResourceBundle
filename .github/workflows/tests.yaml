@@ -27,7 +27,7 @@ jobs:
                 run: bin/phpcs --standard=vendor/escapestudios/symfony2-coding-standard/Symfony/ src/
 
             -   name: Check style on tests
-                run: bin/phpcs --standard=vendor/escapestudios/symfony2-coding-standard/Symfony/ tests/
+                run: bin/phpcs --standard=tests/phpcs-ruleset.xml tests/
 
     php-stan:
         name: Run PHP-Stan

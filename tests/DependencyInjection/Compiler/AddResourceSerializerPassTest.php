@@ -21,6 +21,7 @@ use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer as SymfonySerializer;
 
 /**
@@ -44,6 +45,11 @@ class AddResourceSerializerPassTest extends AbstractCompilerPassTestCase
         $this->container->setDefinition('serializer', $symfonySerializerDef);
 
         $this->container->setDefinition('fivelab.resource.serializer_resolver', new Definition(ResourceSerializerResolver::class));
+
+        $this->container->setDefinition('sf_normalizer_1', new Definition(NormalizerInterface::class));
+        $this->container->setDefinition('sf_normalizer_2', new Definition(NormalizerInterface::class));
+        $this->container->setDefinition('normalizer_1', new Definition(NormalizerInterface::class));
+        $this->container->setDefinition('normalizer_2', new Definition(NormalizerInterface::class));
     }
 
     /**
@@ -86,6 +92,12 @@ class AddResourceSerializerPassTest extends AbstractCompilerPassTestCase
             new Reference('foo.bar'),
             new Reference('resource.serializer'),
         ]);
+
+        $normalizers = ['normalizer_1', 'normalizer_2', 'sf_normalizer_1', 'sf_normalizer_2'];
+
+        foreach ($normalizers as $normalizer) {
+            self::assertFalse($this->container->getDefinition($normalizer)->isShared(), 'Normalizer after compiling must be private.');
+        }
     }
 
     /**

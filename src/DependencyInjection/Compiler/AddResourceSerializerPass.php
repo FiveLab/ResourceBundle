@@ -65,6 +65,11 @@ class AddResourceSerializerPass implements CompilerPassInterface
                 $serializerNormalizers = $serializerDefinition->getArgument(0);
                 $serializerNormalizers = \array_merge($serializerNormalizers, $symfonyNormalizers);
 
+                // Note: all normalizers for this serializer must be a private (non-shared)
+                foreach ($serializerNormalizers as $serializerNormalizer) {
+                    $container->findDefinition((string) $serializerNormalizer)->setShared(false);
+                }
+
                 $serializerDefinition
                     ->replaceArgument(0, $serializerNormalizers)
                     ->replaceArgument(1, $symfonyEncoders)

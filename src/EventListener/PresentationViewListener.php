@@ -72,13 +72,12 @@ class PresentationViewListener
             $acceptedMediaType = null;
 
             $serializer = $this->serializerResolver->resolveByMediaTypes(
-                \get_class($presentation->getResource()), /** @phpstan-ignore-line */
+                \get_class($presentation->getResource()),
                 $event->getRequest()->getAcceptableContentTypes(),
                 $acceptedMediaType
             );
 
             $serializationContext = $this->serializationContextCollector->collect();
-            /* @phpstan-ignore-next-line */
             $data = $serializer->serialize($presentation->getResource(), $serializationContext);
 
             $headers = [

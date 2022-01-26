@@ -101,7 +101,7 @@ class ExceptionListener
 
         try {
             $serializer = $this->serializerResolver->resolveByMediaTypes(
-                \get_class($errorPresentation->getResource()), /** @phpstan-ignore-line */
+                \get_class($errorPresentation->getResource()),
                 $request->getAcceptableContentTypes(),
                 $acceptedMediaType
             );
@@ -112,7 +112,6 @@ class ExceptionListener
         }
 
         $context = $this->serializationContextCollector->collect();
-        /* @phpstan-ignore-next-line */
         $serializedData = $serializer->serialize($errorPresentation->getResource(), $context);
 
         $response = new Response($serializedData, $errorPresentation->getStatusCode(), [

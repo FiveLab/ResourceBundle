@@ -19,7 +19,7 @@
 
     "require": {
         "php": "~7.4 || ~8.0",
-        "sensio/framework-extra-bundle": "~4.4 || ~5.0",
+        "sensio/framework-extra-bundle": "~4.4 || ~5.0 || ~6.0",
         "symfony/property-info": "~4.4 || ~5.0",
         "psr/log": "~1.0",
         "fivelab/resource": "~2.0.0"
@@ -33,7 +33,7 @@
         "symfony/validator": "~4.4 || ~5.0",
         "symfony/security": "~4.4 || ~5.0",
         "symfony/yaml": "~4.4 || ~5.0",
-        "phpstan/phpstan": "~0.12.85"
+        "phpstan/phpstan": "~1.4.2"
     },
 
     "autoload": {

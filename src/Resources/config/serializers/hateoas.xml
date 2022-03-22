@@ -21,10 +21,10 @@
 
         <service id="fivelab.serializer.hateoas" class="%fivelab.serializer.class%">
             <argument type="collection">
-                <argument type="service" id="fivelab.resource.serializer.hateoas.normalizer.relation"/>
-                <argument type="service" id="fivelab.resource.serializer.hateoas.normalizer.relation_collection"/>
-                <argument type="service" id="fivelab.resource.serializer.hateoas.normalizer.resource_collection"/>
                 <argument type="service" id="fivelab.resource.serializer.hateoas.normalizer.paginated_collection"/>
+                <argument type="service" id="fivelab.resource.serializer.hateoas.normalizer.resource_collection"/>
+                <argument type="service" id="fivelab.resource.serializer.hateoas.normalizer.relation_collection"/>
+                <argument type="service" id="fivelab.resource.serializer.hateoas.normalizer.relation"/>
             </argument> <!-- Normalizers -->
             <argument type="collection"/> <!-- Encoders -->
         </service>

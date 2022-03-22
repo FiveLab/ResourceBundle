@@ -64,10 +64,10 @@ class HateoasResoureExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasService('fivelab.serializer.hateoas', Serializer::class);
         $this->assertContainerBuilderHasServiceDefinitionWithArgument('fivelab.serializer.hateoas', 0, [
-            new Reference('fivelab.resource.serializer.hateoas.normalizer.relation'),
-            new Reference('fivelab.resource.serializer.hateoas.normalizer.relation_collection'),
-            new Reference('fivelab.resource.serializer.hateoas.normalizer.resource_collection'),
             new Reference('fivelab.resource.serializer.hateoas.normalizer.paginated_collection'),
+            new Reference('fivelab.resource.serializer.hateoas.normalizer.resource_collection'),
+            new Reference('fivelab.resource.serializer.hateoas.normalizer.relation_collection'),
+            new Reference('fivelab.resource.serializer.hateoas.normalizer.relation'),
         ]);
         $this->assertContainerBuilderHasServiceDefinitionWithArgument('fivelab.serializer.hateoas', 1, []);
 

@@ -13,7 +13,7 @@
         <parameter key="fivelab.resource.assembler_resolver.class">FiveLab\Component\Resource\Assembler\Resolver\ResourceAssemblerResolver</parameter>
         <parameter key="fivelab.resource.serializer_resolver.class">FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerResolver</parameter>
         <parameter key="fivelab.resource.serializer.context_collector.class">FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContextCollector</parameter>
-        <parameter key="fivelab.resource.param_converter.resource.class">FiveLab\Bundle\ResourceBundle\ParamConverter\ResourceParamConverter</parameter>
+        <parameter key="fivelab.resource.value_resolver.resource.class">FiveLab\Bundle\ResourceBundle\ValueResolver\ResourceValueResolver</parameter>
         <parameter key="fivelab.resource.error_presentation_factory.class">FiveLab\Bundle\ResourceBundle\Resource\Error\ErrorPresentationFactory</parameter>
         <parameter key="fivelab.resource.error_presentation_factory.validation_failed.class">FiveLab\Bundle\ResourceBundle\Resource\Error\Factory\ValidationFailedErrorPresentationFactory</parameter>
     </parameters>
@@ -25,11 +25,11 @@
         <!-- Assembler system -->
         <service id="fivelab.resource.assembler_resolver" class="%fivelab.resource.assembler_resolver.class%"/>
 
-        <!-- Param converters -->
-        <service id="fivelab.resource.param_converter.resource" class="%fivelab.resource.param_converter.resource.class%">
+        <!-- Value resolvers -->
+        <service id="fivelab.resource.value_resolver.resource" class="%fivelab.resource.value_resolver.resource.class%">
             <argument type="service" id="fivelab.resource.serializer_resolver"/>
             <argument type="service" id="fivelab.resource.serializer.context_collector"/>
-            <tag name="request.param_converter"/>
+            <tag name="controller.argument_value_resolver" priority="150"/>
         </service>
 
         <!-- Error presentation factory -->

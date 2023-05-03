@@ -24,6 +24,7 @@ use FiveLab\Bundle\ResourceBundle\Resource\Error\Factory\ValidationFailedErrorPr
 use FiveLab\Bundle\ResourceBundle\Resource\EventListener\GenerateSymfonyRouteHrefListener;
 use FiveLab\Bundle\ResourceBundle\Resource\EventListener\SymfonyGrantedActionListener;
 use FiveLab\Bundle\ResourceBundle\Resource\EventListener\SymfonyGrantedRelationListener;
+use FiveLab\Bundle\ResourceBundle\ValueResolver\ResourceValueResolver;
 use FiveLab\Component\Resource\Assembler\Resolver\ResourceAssemblerResolver;
 use FiveLab\Component\Resource\Resource\EventListener\NormalizeNormalizableResourcesListener;
 use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContextCollector;
@@ -59,11 +60,11 @@ class ResourceExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasService('fivelab.resource.assembler_resolver', ResourceAssemblerResolver::class);
         $this->assertContainerBuilderHasService('fivelab.resource.error_presentation_factory', ErrorPresentationFactory::class);
 
-        // Check param converter
-        $this->assertContainerBuilderHasService('fivelab.resource.param_converter.resource', ResourceParamConverter::class);
-        $this->assertContainerBuilderHasServiceDefinitionWithTag('fivelab.resource.param_converter.resource', 'request.param_converter');
-        $this->assertContainerBuilderHasServiceDefinitionWithArgument('fivelab.resource.param_converter.resource', 0, new Reference('fivelab.resource.serializer_resolver'));
-        $this->assertContainerBuilderHasServiceDefinitionWithArgument('fivelab.resource.param_converter.resource', 1, new Reference('fivelab.resource.serializer.context_collector'));
+        // Check value resolver
+        $this->assertContainerBuilderHasService('fivelab.resource.value_resolver.resource', ResourceValueResolver::class);
+        $this->assertContainerBuilderHasServiceDefinitionWithTag('fivelab.resource.value_resolver.resource', 'controller.argument_value_resolver', ['priority' => 150]);
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument('fivelab.resource.value_resolver.resource', 0, new Reference('fivelab.resource.serializer_resolver'));
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument('fivelab.resource.value_resolver.resource', 1, new Reference('fivelab.resource.serializer.context_collector'));
 
         // Check validation presentation factory
         $this->assertContainerBuilderHasService('fivelab.resource.error_presentation_factory.validation_failed', ValidationFailedErrorPresentationFactory::class);

@@ -11,10 +11,10 @@ declare(strict_types = 1);
  * file that was distributed with this source code
  */
 
-namespace FiveLab\Bundle\ResourceBundle\Tests\ParamConverter;
+namespace FiveLab\Bundle\ResourceBundle\Tests\ValueResolver;
 
 use FiveLab\Bundle\ResourceBundle\Exception\MissingContentInRequestException;
-use FiveLab\Bundle\ResourceBundle\ParamConverter\ResourceParamConverter;
+use FiveLab\Bundle\ResourceBundle\ValueResolver\ResourceValueResolver;
 use FiveLab\Component\Resource\Resource\ResourceInterface;
 use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContextCollectorInterface;
 use FiveLab\Component\Resource\Serializer\Context\ResourceSerializationContext;
@@ -22,13 +22,13 @@ use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerResolverInt
 use FiveLab\Component\Resource\Serializer\ResourceSerializerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
 /**
  * @author Vitaliy Zhuk <v.zhuk@fivelab.org>
  */
-class ResourceParamConverterTest extends TestCase
+class ResourceValueResolverTest extends TestCase
 {
     /**
      * @var ResourceSerializerResolverInterface|MockObject
@@ -41,9 +41,9 @@ class ResourceParamConverterTest extends TestCase
     private SerializationContextCollectorInterface $serializationContextCollector;
 
     /**
-     * @var ResourceParamConverter
+     * @var ResourceValueResolver
      */
-    private ResourceParamConverter $converter;
+    private ResourceValueResolver $resolver;
 
     /**
      * {@inheritdoc}
@@ -52,7 +52,7 @@ class ResourceParamConverterTest extends TestCase
     {
         $this->serializerResolver = $this->createMock(ResourceSerializerResolverInterface::class);
         $this->serializationContextCollector = $this->createMock(SerializationContextCollectorInterface::class);
-        $this->converter = new ResourceParamConverter($this->serializerResolver, $this->serializationContextCollector);
+        $this->resolver = new ResourceValueResolver($this->serializerResolver, $this->serializationContextCollector);
     }
 
     /**
@@ -60,11 +60,9 @@ class ResourceParamConverterTest extends TestCase
      */
     public function shouldSupportForResource(): void
     {
-        $config = new ParamConverter([
-            'class' => ResourceInterface::class,
-        ]);
+        $argument = new ArgumentMetadata('foo', ResourceInterface::class, false, false, null);
 
-        $supports = $this->converter->supports($config);
+        $supports = $this->resolver->supports(new Request(), $argument);
 
         self::assertTrue($supports);
     }
@@ -74,11 +72,9 @@ class ResourceParamConverterTest extends TestCase
      */
     public function shouldNotSupportsIfPassNoResource(): void
     {
-        $config = new ParamConverter([
-            'class' => \stdClass::class,
-        ]);
+        $argument = new ArgumentMetadata('foo', \stdClass::class, false, false, null);
 
-        $supports = $this->converter->supports($config);
+        $supports = $this->resolver->supports(new Request(), $argument);
 
         self::assertFalse($supports);
     }
@@ -89,17 +85,12 @@ class ResourceParamConverterTest extends TestCase
     public function shouldSuccessConvertForOptionalValueWithoutContent(): void
     {
         $request = $this->createRequest('');
-        $config = new ParamConverter([
-            'class' => ResourceInterface::class,
-            'name'  => 'some',
-        ]);
 
-        $config->setIsOptional(true);
+        $argument = new ArgumentMetadata('bar', ResourceInterface::class, false, true, null, true);
 
-        $this->converter->apply($request, $config);
+        $result = $this->resolver->resolve($request, $argument);
 
-        self::assertTrue($request->attributes->has('some'));
-        self::assertNull($request->attributes->get('some'));
+        self::assertEquals([null], $result);
     }
 
     /**
@@ -107,16 +98,14 @@ class ResourceParamConverterTest extends TestCase
      */
     public function shouldThrowExceptionOnConvertForRequiredValueWithoutContent(): void
     {
+        $request = $this->createRequest('');
+
+        $argument = new ArgumentMetadata('bar', ResourceInterface::class, false, false, null, false);
+
         $this->expectException(MissingContentInRequestException::class);
         $this->expectExceptionMessage('Missing content in request.');
 
-        $request = $this->createRequest('');
-        $config = new ParamConverter([
-            'class' => ResourceInterface::class,
-            'name'  => 'some',
-        ]);
-
-        $this->converter->apply($request, $config);
+        $this->resolver->resolve($request, $argument);
     }
 
     /**
@@ -126,12 +115,11 @@ class ResourceParamConverterTest extends TestCase
     {
         $request = $this->createRequest('some-foo-content', 'application/some');
         $context = new ResourceSerializationContext([]);
+
         $serializer = $this->createMock(ResourceSerializerInterface::class);
         $resource = $this->createMock(ResourceInterface::class);
-        $config = new ParamConverter([
-            'class' => ResourceInterface::class,
-            'name'  => 'some',
-        ]);
+
+        $argument = new ArgumentMetadata('bar', ResourceInterface::class, false, false, null, false);
 
         $this->serializationContextCollector->expects(self::once())
             ->method('collect')
@@ -147,10 +135,9 @@ class ResourceParamConverterTest extends TestCase
             ->with('some-foo-content', ResourceInterface::class, $context)
             ->willReturn($resource);
 
-        $this->converter->apply($request, $config);
+        $resolved = $this->resolver->resolve($request, $argument);
 
-        self::assertTrue($request->attributes->has('some'));
-        self::assertEquals($resource, $request->attributes->get('some'));
+        self::assertEquals([$resource], $resolved);
     }
 
     /**

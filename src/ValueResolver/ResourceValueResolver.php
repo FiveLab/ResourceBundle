@@ -11,23 +11,22 @@ declare(strict_types = 1);
  * file that was distributed with this source code
  */
 
-namespace FiveLab\Bundle\ResourceBundle\ParamConverter;
+namespace FiveLab\Bundle\ResourceBundle\ValueResolver;
 
 use FiveLab\Bundle\ResourceBundle\Exception\MissingContentInRequestException;
 use FiveLab\Component\Resource\Resource\ResourceInterface;
 use FiveLab\Component\Resource\Serializer\Context\Collector\SerializationContextCollectorInterface;
-use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerNotFoundException;
 use FiveLab\Component\Resource\Serializer\Resolver\ResourceSerializerResolverInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
+use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
 /**
- * Parameter converter for convert input request to input resource for next pass to controller.
+ * Value resolver for convert input request to input resource for next pass to controller.
  *
  * @author Vitaliy Zhuk <v.zhuk@fivelab.org>
  */
-class ResourceParamConverter implements ParamConverterInterface
+class ResourceValueResolver implements ArgumentValueResolverInterface
 {
     /**
      * @var ResourceSerializerResolverInterface
@@ -53,39 +52,32 @@ class ResourceParamConverter implements ParamConverterInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @throws MissingContentInRequestException
-     * @throws ResourceSerializerNotFoundException
      */
-    public function apply(Request $request, ParamConverter $configuration): bool
+    public function supports(Request $request, ArgumentMetadata $argument): bool
     {
-        $content = (string) $request->getContent();
-
-        if (!$content) {
-            if ($configuration->isOptional()) {
-                $request->attributes->set($configuration->getName(), null);
-
-                return true;
-            }
-
-            throw new MissingContentInRequestException();
-        }
-
-        $serializer = $this->serializerResolver->resolveByMediaType($configuration->getClass(), (string) $request->headers->get('Content-Type'));
-        $context = $this->serializationContextCollector->collect();
-
-        $resource = $serializer->deserialize($content, $configuration->getClass(), $context);
-
-        $request->attributes->set($configuration->getName(), $resource);
-
-        return true;
+        return $argument->getType() && \is_a($argument->getType(), ResourceInterface::class, true);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function supports(ParamConverter $configuration): bool
+    public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
-        return \is_a($configuration->getClass(), ResourceInterface::class, true);
+        $content = (string) $request->getContent();
+
+        if (!$content) {
+            if ($argument->isNullable()) {
+                return [null];
+            }
+
+            throw new MissingContentInRequestException();
+        }
+
+        $serializer = $this->serializerResolver->resolveByMediaType((string) $argument->getType(), (string) $request->headers->get('Content-Type'));
+        $context = $this->serializationContextCollector->collect();
+
+        $resource = $serializer->deserialize($content, (string) $argument->getType(), $context);
+
+        return [$resource];
     }
 }

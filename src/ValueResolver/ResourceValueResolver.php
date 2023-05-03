@@ -60,6 +60,8 @@ class ResourceValueResolver implements ArgumentValueResolverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return array<?ResourceInterface>
      */
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {

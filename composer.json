@@ -18,10 +18,10 @@
     ],
 
     "require": {
-        "php": "~7.4 || ~8.0",
-        "symfony/property-info": "~4.4 | ~5.0 | ~6.0",
+        "php": "~8.0",
+        "symfony/property-info": "~5.4 | ~6.0",
         "psr/log": "~1.0 | ~2.0 | ~3.0",
-        "fivelab/resource": "~2.0.0"
+        "fivelab/resource": "~2.1.0"
     },
 
     "require-dev": {
@@ -29,11 +29,13 @@
         "phpmetrics/phpmetrics": "~2.0",
         "escapestudios/symfony2-coding-standard": "~3.5",
         "matthiasnoback/symfony-dependency-injection-test": "~4.0",
-        "symfony/validator": "~4.4 | ~5.0 | ~6.0",
-        "symfony/security": "~4.4 | ~5.0 | ~6.0",
-        "symfony/yaml": "~4.4 | ~5.0 | ~6.0",
-        "symfony/routing": "~4.4 | ~5.0 | ~6.0",
-        "phpstan/phpstan": "~1.4.2"
+        "symfony/validator": "~5.4 | ~6.0",
+        "symfony/security-core": "~5.4 | ~6.0",
+        "symfony/http-foundation": "~5.4 | ~6.0",
+        "symfony/http-kernel": "~5.4 | ~6.0",
+        "symfony/yaml": "~5.4 | ~6.0",
+        "symfony/routing": "~5.4 | ~6.0",
+        "phpstan/phpstan": "~1.10.0"
     },
 
     "autoload": {
